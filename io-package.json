@@ -1,0 +1,79 @@
+{
+	"common": {
+		"name": "mysql",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"zh-cn": "首次出版"
+			}
+		},
+		"title": "mySQL",
+		"titleLang": {
+			"en": "mySQL",
+			"de": "mySQL",
+			"ru": "MYSQL",
+			"pt": "mySQL",
+			"nl": "mySQL",
+			"fr": "mySQL",
+			"it": "mySQL",
+			"es": "mySQL",
+			"pl": "mySQL",
+			"zh-cn": "MySQL的"
+		},
+		"desc": {
+			"en": "interface to mySQL database",
+			"de": "Schnittstelle zur mySQL-Datenbank",
+			"ru": "интерфейс к базе данных MySQL",
+			"pt": "interface com o banco de dados mySQL",
+			"nl": "interface naar mySQL-database",
+			"fr": "interface avec la base de données mySQL",
+			"it": "interfaccia al database mySQL",
+			"es": "interfaz a la base de datos mySQL",
+			"pl": "interfejs do bazy danych mySQL",
+			"zh-cn": "与mySQL数据库的接口"
+		},
+		"authors": [
+			"René G. <info@rg-engineering.eu>"
+		],
+		"keywords": [
+			"mysql",
+			"database"
+		],
+		"license": "MIT",
+		"platform": "Javascript/Node.js",
+		"main": "main.js",
+		"icon": "mysql.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/rg-engineering/ioBroker.mysql/master/admin/mysql.png",
+		"readme": "https://github.com/rg-engineering/ioBroker.mysql/blob/master/README.md",
+		"loglevel": "info",
+		"mode": "daemon",
+		"type": "storage",
+		"compact": true,
+		"materialize": true,
+		"dependencies": [
+			{
+				"js-controller": ">=1.4.2"
+			}
+		]
+	},
+	"native": {
+		"SQL_IP": "localhost",
+		"SQL_Port": 3306,
+		"SQL_User": "",
+		"SQL_Password": "",
+		"SQL_Databasename": "",
+		"SQL_Databasetype": "MariaDB"
+	},
+	"objects": [],
+	"instanceObjects": []
+}
