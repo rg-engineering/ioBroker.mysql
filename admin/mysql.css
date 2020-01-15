@@ -1,0 +1,12 @@
+.filepreview-table {
+	border: double;
+}
+
+.datatype-button {
+	background-color: #4CAF50;
+	padding: 1px 1px;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 8px;
+	width: 32px;
+}

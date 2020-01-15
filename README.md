@@ -93,7 +93,7 @@ For later updates, the above procedure is not necessary. Just do the following:
 ## License
 MIT License
 
-Copyright (c) 2019 rg-engineering <info@rg-engineering.eu>
+Copyright (c) 2019-2020 rg-engineering <info@rg-engineering.eu>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

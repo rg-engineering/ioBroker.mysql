@@ -53,6 +53,7 @@
 		"main": "main.js",
 		"icon": "mysql.png",
 		"enabled": true,
+		"messagebox": true,
 		"extIcon": "https://raw.githubusercontent.com/rg-engineering/ioBroker.mysql/master/admin/mysql.png",
 		"readme": "https://github.com/rg-engineering/ioBroker.mysql/blob/master/README.md",
 		"loglevel": "info",
@@ -72,7 +73,12 @@
 		"SQL_User": "",
 		"SQL_Password": "",
 		"SQL_Databasename": "",
-		"SQL_Databasetype": "MariaDB"
+		"import_type": 1,
+		"import_separator": 2,
+		"import_table": "",
+		"import_FirstLineIsHeadline": true,
+		"import_CreateColumns": true,
+		"import_FillUp":  false
 	},
 	"objects": [],
 	"instanceObjects": []

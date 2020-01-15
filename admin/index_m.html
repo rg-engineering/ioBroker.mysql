@@ -2,92 +2,470 @@
 
 <head>
 
-	<!-- Load ioBroker scripts and styles-->
-	<link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
-	<link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
+    <!-- Load ioBroker scripts and styles-->
+    <link rel="stylesheet" type="text/css" href="mysql.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/adapter.css" />
+    <link rel="stylesheet" type="text/css" href="../../lib/css/materialize.css">
 
-	<script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
-	<script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="../../lib/js/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
 
-	<script type="text/javascript" src="../../js/translate.js"></script>
-	<script type="text/javascript" src="../../lib/js/materialize.js"></script>
-	<script type="text/javascript" src="../../js/adapter-settings.js"></script>
+    <script type="text/javascript" src="../../js/translate.js"></script>
+    <script type="text/javascript" src="../../lib/js/materialize.js"></script>
+    <script type="text/javascript" src="../../js/adapter-settings.js"></script>
 
-	<!-- Load our own files -->
-	<link rel="stylesheet" type="text/css" href="style.css" />
-	<script type="text/javascript" src="words.js"></script>
+    <!-- Load our own files -->
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="words.js"></script>
 
-	<script type="text/javascript">
-		// This will be called by the admin adapter when the settings page loads
-		function load(settings, onChange) {
-			// example: select elements with id=key and class=value and insert value
-			if (!settings) return;
-			$('.value').each(function () {
-				var $key = $(this);
-				var id = $key.attr('id');
-				if ($key.attr('type') === 'checkbox') {
-					// do not call onChange direct, because onChange could expect some arguments
-					$key.prop('checked', settings[id])
-						.on('change', () => onChange())
-						;
-				} else {
-					// do not call onChange direct, because onChange could expect some arguments
-					$key.val(settings[id])
-						.on('change', () => onChange())
-						.on('keyup', () => onChange())
-						;
-				}
-			});
-			onChange(false);
-			// reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
-			if (M) M.updateTextFields();
-		}
+    <script type="text/javascript">
+        // This will be called by the admin adapter when the settings page loads
+        function load(settings, onChange) {
+            // example: select elements with id=key and class=value and insert value
+            if (!settings) return;
+            $('.value').each(function () {
+                var $key = $(this);
+                var id = $key.attr('id');
+                if ($key.attr('type') === 'checkbox') {
+                    // do not call onChange direct, because onChange could expect some arguments
+                    $key.prop('checked', settings[id])
+                        .on('change', () => onChange())
+                        ;
+                } else {
+                    // do not call onChange direct, because onChange could expect some arguments
+                    $key.val(settings[id])
+                        .on('change', () => onChange())
+                        .on('keyup', () => onChange())
+                        ;
+                }
+            });
 
-		// This will be called by the admin adapter when the user presses the save button
-		function save(callback) {
-			// example: select elements with class=value and build settings object
-			var obj = {};
-			$('.value').each(function () {
-				var $this = $(this);
-				if ($this.attr('type') === 'checkbox') {
-					obj[$this.attr('id')] = $this.prop('checked');
-				} else {
-					obj[$this.attr('id')] = $this.val();
-				}
-			});
-			callback(obj);
-		}
-	</script>
+            var _id = 'mysql.' + instance;
+            getTables(onChange, _id, settings.import_table);
+
+            var $selectfile = $('#selectfile');
+            $selectfile.click(function () {
+                console.log('select file');
+
+                var input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('id', 'files');
+                input.setAttribute('opacity', 0);
+                input.addEventListener('change', function (e) {
+                    handleFileSelect(e, function () { });
+                }, false);
+                (input.click)();
+
+
+            });
+
+            var $import = $('#import');
+            $import.click(function () {
+                console.log('import not implemented yet');
+
+
+            });
+
+            var $createtable = $('#createtable');
+            $createtable.click(function () {
+                console.log('createtable not implemented yet');
+
+            });
+
+            onChange(false);
+            // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
+            if (M) M.updateTextFields();
+        }
+
+        var timeout1;
+        function getTables(onChange, instance, actualValue) {
+            timeout1 = setTimeout(function () {
+                getTables(onChange, instance, actualValue);
+            }, 4000);
+
+            //function sendTo(_adapter_instance, command, message, callback)
+            sendTo(instance, 'getTables', null, function (list) {
+                if (timeout1) {
+                    clearTimeout(timeout1);
+                    timeout1 = null;
+                }
+
+                console.log('got tables ' + JSON.stringify(list));
+
+                var $sel = $('#import_table');
+                for (var i = 0; i < list.length; i++) {
+                    $sel.append('<option value="' + list[i] + '" ' + ((actualValue == list[i]) ? 'selected' : '') + '>' + list[i] + '</option>');
+                }
+                $sel.select();
+
+            });
+        }
+
+        var timeout2;
+        function ImportData(instance, data) {
+            timeout2 = setTimeout(function () {
+                ImportData(instance, data);
+            }, 4000);
+
+            //function sendTo(_adapter_instance, command, message, callback)
+            sendTo(instance, 'importData', data, function (list) {
+                if (timeout2) {
+                    clearTimeout(timeout2);
+                    timeout2 = null;
+                }
+
+                console.log('data imported ');
+            });
+        }
+
+
+        // This will be called by the admin adapter when the user presses the save button
+        function save(callback) {
+            // example: select elements with class=value and build settings object
+            var obj = {};
+            $('.value').each(function () {
+                var $this = $(this);
+                if ($this.attr('type') === 'checkbox') {
+                    obj[$this.attr('id')] = $this.prop('checked');
+                } else {
+                    obj[$this.attr('id')] = $this.val();
+                }
+            });
+            callback(obj);
+        }
+
+        function handleFileSelect(evt) {
+            var f = evt.target.files[0];
+
+            if (f) {
+                var r = new FileReader();
+                r.onload = function (e) {
+
+                    var type = $('#import_type').val();
+
+                    var contents = e.target.result;
+
+                    if (type == 1) {
+
+                        var separator = $('#import_separator').val();
+                        console.log("separator " + separator);
+                        var allRows = contents.split(/\r?\n|\r/);
+
+                        var separator_char;
+
+                        switch (separator) {
+                            case "1": separator_char = ','; break;
+                            case "2": separator_char = ';'; break;
+                            default:
+                                console.log("no separator defined " + separator);
+                                break;
+                        }
+                        //to do show table and set configuration
+
+                        var headers = allRows[0].split(separator_char);
+
+                        console.log(JSON.stringify(headers));
+
+                        var previewfiletable = $('#importfilepreview');
+                        previewfiletable.find('thead').each(function () {
+                            var head = $(this);
+
+                            var row2appand;
+                            row2appand = '<tr>';
+                            for (var i = 0; i < headers.length; i++) {
+                                row2appand += '<th>' + headers[i] + '</th>';
+                            }
+                            row2appand += '</tr>';
+                            head.append(row2appand);
+
+                            row2appand = '<tr class = "preview_editable_row" >';
+                            for (var i = 0; i < headers.length; i++) {
+
+                                row2appand += '<th class = "preview_editable" data-value = "' + i + '" >';
+                                if (headers[i].length == 0) {
+                                    row2appand += ' none ';
+                                }
+                                else {
+                                    row2appand += ' text ';
+                                }
+
+                                row2appand +='<button class="datatype-button small-button" data-col="' + i +  '" title="' + _('select datatype') + '"><i class="material-icons">datatype</i></button>';
+               
+                                 row2appand += '</th>';
+                            }
+
+                            row2appand += '</tr>';
+                            head.append(row2appand);
+
+                            head.find('button').each(function () {
+                                var found = $(this);
+                                console.log("found " + JSON.stringify(found))
+
+                                found.find('th').each(function() {
+                                    var cell = $(this);
+
+                                    cell.on('click', function () {
+
+                                        console.log("clicked");
+
+                                    });
+
+                                });
+
+                                
+
+                            });
+
+
+
+                        });
+
+                        previewfiletable.find('tbody').each(function () {
+                            var body = $(this);
+
+                            var maxRows = 6;
+                            if (allRows.length < 6) {
+                                maxRows = allRows.length;
+                            }
+
+                            var row2appand;
+
+                            for (var i = 1; i < maxRows; i++) {
+                                row2appand = '<tr>';
+                                var row = allRows[i].split(separator_char);
+                                for (var j = 0; j < row.length; j++) {
+                                    row2appand += '<td>' + row[j] + '</td>';
+                                }
+                                row2appand += '</tr>';
+                                body.append(row2appand);
+                            }
+
+                        });
+
+
+                    }
+                    else if (type == 2) {
+                        console.log("JSON not implemented yet");
+                    }
+                }
+
+                r.readAsText(f);
+            }
+        }
+
+        /*
+                function handleFileSelect(evt) {
+                    var f = evt.target.files[0];
+
+                    if (f) {
+                        var r = new FileReader();
+                        r.onload = function (e) {
+
+                            var type = $('#import_type').val();
+
+                            var contents = e.target.result;
+
+                            if (type == 1) {
+
+                                var separator = $('#import_separator').val();
+                                console.log("separator " + separator);
+                                var allRows = contents.split(/\r?\n|\r/);
+
+                                var separator_char;
+
+                                switch (separator) {
+                                    case "1": separator_char = ','; break;
+                                    case "2": separator_char = ';'; break;
+                                    default:
+                                        console.log("no separator defined " + separator);
+                                        break;
+                                }
+
+                                //var headers = allRows[0].split(separator_char);
+
+                                //console.log(JSON.stringify(headers));
+
+                                //for (var singleRow = 1; singleRow < allRows.length; singleRow++) {
+                                //    var rowCells = allRows[singleRow].split(';');
+
+                                    //console.log(JSON.stringify(rowCells));
+                                //}
+
+                                var _id = 'mysql.' + instance;
+
+                                var table = $('#import_table').val();
+                                var createcols = $('#import_CreateColumns').prop('checked');
+                                var FirstLineIsHeadline = $('#import_FirstLineIsHeadline').prop('checked');
+                                var FillUp = $('#import_FillUp').prop('checked');
+
+                                let data = {
+                                    rows: allRows,
+                                    filetype: type,
+                                    separator: separator_char,
+                                    table: table,
+                                    createcols: createcols,
+                                    FirstLineIsHeadline: FirstLineIsHeadline,
+                                    FillUp:FillUp
+                                }
+
+                                ImportData(_id, data);
+
+                            }
+                            else if (type == 2) {
+                                //var json = JSON.parse(contents);
+                                //var len = Object.keys(json).length;
+
+                                console.log("JSON not implemented yet");
+                            }
+
+
+
+
+                        }
+
+                        r.readAsText(f);
+                    }
+                }
+
+        */
+    </script>
 
 </head>
 
 <body>
 
-	<div class="m adapter-container">
+    <div class="m adapter-container">
 
-		<div class="row">
-			<div class="col s12 m4 l2">
-				<img src="mysql.png" class="logo">
-			</div>
-		</div>
+        <div class="col s12">
+            <ul class="tabs">
+                <li class="tab col s2"><a href="#tab-main" class="translate active">Main settings</a></li>
+                <li class="tab col s2 le-settings"><a href="#tab-admin" class="translate">Administration</a></li>
+                <li class="tab col s2 le-import"><a href="#tab-import" class="translate">Import</a></li>
+            </ul>
+        </div>
 
-		<!-- Put your content here -->
 
-		<!-- For example columns with settings: -->
-		<div class="row">
-			<div class="col s6 input-field">
-				<input type="checkbox" class="value" id="option1" />
-				<label for="option1" class="translate">option1</label>
-			</div>
+        <div id="tab-main" class="col s12 page">
+            <div class="row">
+                <div class="col s6 m4 l2">
+                    <img src="mysql.png" class="logo">
+                </div>
+            </div>
 
-			<div class="col s6 input-field">
-				<input type="text" class="value" id="option2" />
-				<label for="option2" class="translate">option2</label>
-			</div>
-		</div>
+            <div class="row">
+                <div class="input-field col s6 col-mysql-ip">
+                    <input type="text" id="SQL_IP" class="value" />
+                    <label for="SQL_IP" class="translate">SQL_DB_IP</label>
+                </div>
 
-	</div>
+                <div class="input-field col s4 col-mysql-port">
+                    <input type="number" id="SQL_Port" class="value" />
+                    <label for="SQL_Port" class="translate">SQL_DB_port</label>
+                </div>
+            </div>
 
+            <div class="row">
+                <div class="input-field col s6 col-mysql-name">
+                    <input type="text" id="SQL_Databasename" class="value" />
+                    <label for="SQL_Databasename" class="translate">SQL_DB_databasename</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s6 col-mysql-user">
+                    <input type="text" id="SQL_User" class="value" />
+                    <label for="SQL_User" class="translate">SQL_DB_user</label>
+                </div>
+
+                <div class="input-field col s4 col-mysql-password">
+                    <input type="text" id="SQL_Password" class="value" />
+                    <label for="SQL_Password" class="translate">SQL_DB_password</label>
+                </div>
+            </div>
+
+        </div>
+
+        <!--  admin page -->
+        <div id="tab-admin" class="col s12 page-admin">
+
+            <!-- to do show existing tables -->
+
+            <div class="row">
+                <div class="input-field col s2">
+                    <input type="text" id="newtablename" class="value" />
+                    <label for="newtablename" class="translate">newtablename</label>
+                </div>
+
+                <div class="input-field col s2">
+                    <a class="waves-effect waves-light btn" id="createtable"><span class="translate">createtable</span></a>
+                    <div id="createtable"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--  import page -->
+        <div id="tab-import" class="col s12 page-import">
+
+            <div class="row">
+                <div class="input-field col s2">
+                    <select id="import_table" class="value">
+                    </select>
+                    <label for="import_table" class="translate">import_table</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s1">
+                    <select id="import_type" class="value">
+                        <option value="1" class="translate">csv</option>
+                        <option value="2" class="translate">JSON</option>
+                    </select>
+                    <label for="import_type" class="translate">import_type</label>
+                </div>
+                <div class="input-field col s1">
+                    <select id="import_separator" class="value">
+                        <option value="1" class="translate">,</option>
+                        <option value="2" class="translate">;</option>
+                    </select>
+                    <label for="import_separator" class="translate">import_separator</label>
+                </div>
+                <div class="input-field col s2">
+                    <input type="checkbox" id="import_FirstLineIsHeadline" class="value" />
+                    <label for="import_FirstLineIsHeadline" class="translate">import_FirstLineIsHeadline</label>
+                </div>
+                <div class="input-field col s2">
+                    <input type="checkbox" id="import_CreateColumns" class="value" />
+                    <label for="import_CreateColumns" class="translate">import_CreateColumns</label>
+                </div>
+                <div class="input-field col s2">
+                    <input type="checkbox" id="import_FillUp" class="value" />
+                    <label for="import_FillUp" class="translate">import_FillUp</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s1">
+                    <a class="waves-effect waves-light btn" id="selectfile"><span class="translate">select_file</span></a>
+                    <div id="select_file"></div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="grid-main-div m" style="width: 100%; overflow-y: auto" id="importfilepreview-div">
+                    <table id="importfilepreview" class="filepreview-table">
+                        <thead id="importfilepreviewhead"></thead>
+                        <tbody id="importfilepreviewbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="input-field col s1">
+                    <a class="waves-effect waves-light btn" id="import"><span class="translate">import</span></a>
+                    <div id="import"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
-
 </html>
