@@ -1,5 +1,11 @@
+.grid-main-div {
+	color: green;
+}
+
+
 .filepreview-table {
 	border: double;
+	border-color: green,
 }
 
 .datatype-button {
@@ -9,4 +15,8 @@
 	display: inline-block;
 	font-size: 8px;
 	width: 32px;
+}
+
+.preview_editable {
+	display: normal
 }

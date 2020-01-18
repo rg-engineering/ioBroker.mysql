@@ -173,7 +173,7 @@
                             var row2appand;
                             row2appand = '<tr>';
                             for (var i = 0; i < headers.length; i++) {
-                                row2appand += '<th>' + headers[i] + '</th>';
+                                row2appand += '<th style="text-align: center">' + headers[i] + '</th>';
                             }
                             row2appand += '</tr>';
                             head.append(row2appand);
@@ -181,42 +181,22 @@
                             row2appand = '<tr class = "preview_editable_row" >';
                             for (var i = 0; i < headers.length; i++) {
 
-                                row2appand += '<th class = "preview_editable" data-value = "' + i + '" >';
-                                if (headers[i].length == 0) {
-                                    row2appand += ' none ';
+                                let val;
+                                if (headers[i].length > 0) {
+                                    val = "string";
                                 }
                                 else {
-                                    row2appand += ' text ';
+                                    val = "none";
                                 }
 
-                                row2appand +='<button class="datatype-button small-button" data-col="' + i +  '" title="' + _('select datatype') + '"><i class="material-icons">datatype</i></button>';
-               
-                                 row2appand += '</th>';
+                                row2appand += '<th class = "preview_editable" data-value = "' + val + '"  data-name="datatype"  style="text-align: center" data-options="none:none;float:float;number:number;string:string;date:date"  title="select datatype" > ' + 'none' + '</th>';
                             }
 
                             row2appand += '</tr>';
                             head.append(row2appand);
 
-                            head.find('button').each(function () {
-                                var found = $(this);
-                                console.log("found " + JSON.stringify(found))
-
-                                found.find('th').each(function() {
-                                    var cell = $(this);
-
-                                    cell.on('click', function () {
-
-                                        console.log("clicked");
-
-                                    });
-
-                                });
-
-                                
-
-                            });
-
-
+                            head.find('.preview_editable')
+                                .on('click', onQuickEditField);
 
                         });
 
@@ -234,7 +214,7 @@
                                 row2appand = '<tr>';
                                 var row = allRows[i].split(separator_char);
                                 for (var j = 0; j < row.length; j++) {
-                                    row2appand += '<td>' + row[j] + '</td>';
+                                    row2appand += '<td style="text-align: center">' + row[j] + '</td>';
                                 }
                                 row2appand += '</tr>';
                                 body.append(row2appand);
@@ -328,6 +308,121 @@
                 }
 
         */
+
+        function onQuickEditField(e) {
+            var $this = $(this);
+            var attr = $this.data('name');
+            var options = $this.data('options');
+            var oldVal = $this.data('value');
+            var innerHTML = this.innerHTML;
+            var textAlign = $this.css('text-align');
+            $this.css('text-align', 'left');
+
+            $this.off('click').removeClass('select-id-quick-edit').css('position', 'relative');
+
+            //var css = 'cursor: pointer; position: absolute;width: 16px; height: 16px; top: 2px; border-radius: 6px; z-index: 3; background-color: lightgray';
+            var css = 'cursor: pointer;';
+
+            var type = 'text';
+            var text;
+
+            if (options) {
+                var opt = options.split(';');
+                text = '<select style="width: calc(100% - 50px); z-index: 2; display: inherit">';
+                for (var i = 0; i < opt.length; i++) {
+                    var parts = opt[i].split(':');
+                    text += '<option value="' + parts[0] + '">' + (parts[1] || parts[0]) + '</option>';
+                }
+                text += '</select>';
+            }
+            text = text || '<input style="' + (type !== 'checkbox' ? 'width: 100%;' : '') + ' z-index: 2" type="' + type + '"/>';
+
+            var timeout = null;
+
+            $this.html(text +
+                '<div class="select-id-quick-edit-ok material-icons" style="margin-top: 0.45em;' + css + ';right: 22px" title="okay">check</div>' +
+                '<div class="select-id-quick-edit-cancel material-icons" style="margin-top: 0.45em;' + css + ';right: 2px" title="cancel">clear</div>');
+
+            var $input = (options) ? $this.find('select') : $this.find('input');
+
+            $this.find('.select-id-quick-edit-cancel').off('click').on('click', function (e) {
+                if (timeout) clearTimeout(timeout);
+                timeout = null;
+
+                console.log("cancel " + innerHTML);
+
+                e.preventDefault();
+                e.stopPropagation();
+                $this.html(innerHTML)
+                    .off('click')
+                    .on('click', onQuickEditField)
+                    .addClass('select-id-quick-edit')
+                    .css('text-align', textAlign);
+            });
+
+            $this.find('.select-id-quick-edit-ok').off('click').on('click', function () {
+
+                $this.trigger('blur');
+
+            });
+
+            $input.val(oldVal);
+            $input.blur(function () {
+                if (timeout) clearTimeout(timeout);
+
+                console.log("blur");
+
+                timeout = setTimeout(function () {
+
+                    console.log("okay " + innerHTML);
+
+                    timeout = null;
+                    var val = $(this).val();
+                    var newVal;
+
+                    if (JSON.stringify(val) !== JSON.stringify(oldVal)) {
+                        newVal = '<span style="color: pink">' + val + '</span>';
+                    } else {
+                        newVal = innerHTML;
+                    }
+
+                    console.log("okay after " + innerHTML + " " + newVal);
+
+                    $this.html(newVal)
+                        .off('click')
+                        .on('click', onQuickEditField)
+                        .addClass('select-id-quick-edit')
+                        .css('text-align', textAlign);
+                }.bind(this), 100);
+            }).on('keyup', function (e) {
+                if (e.which === 13) {
+                    console.log("13");
+                    $(this).trigger('blur');
+                }
+                if (e.which === 27) {
+                    console.log("27 " + oldVal);
+                    if (oldVal === undefined) oldVal = '';
+                    $this.html(oldVal)
+                        .off('click')
+                        .on('click', onQuickEditField)
+                        .addClass('select-id-quick-edit')
+                        .css('text-align', textAlign);
+                }
+            });
+
+            if (typeof e === 'object') {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            setTimeout(function () {
+                $input.focus();
+            }, 100);
+
+
+        }
+
+
+
     </script>
 
 </head>
