@@ -19,6 +19,11 @@
     <script type="text/javascript" src="words.js"></script>
 
     <script type="text/javascript">
+
+        //data to import:
+        var allRows;
+
+
         // This will be called by the admin adapter when the settings page loads
         function load(settings, onChange) {
             // example: select elements with id=key and class=value and insert value
@@ -61,7 +66,38 @@
 
             var $import = $('#import');
             $import.click(function () {
-                console.log('import not implemented yet');
+                console.log('import file');
+
+                let data = {
+                    allRows: [],
+                    datatypes: [],
+                    separator: "",
+                    filetype: "",
+                    headerIsFirstLine: "",
+                    createColumns: "",
+                    fillUp: "",
+                    table: ""
+                }
+
+                let dataTypes = getDataTypes('#importfilepreview-div');
+
+                //datatype per header
+                //body
+                //settings
+                data.datatypes = dataTypes;
+                data.separator = $('#import_separator').val();
+                data.filetype = $('#import_type').val();
+                data.headerIsFirstLine = $('#import_FirstLineIsHeadline').prop('checked');
+                data.createColumns = $('#import_CreateColumns').prop('checked');
+                data.fillUp = $('#import_FillUp').prop('checked');
+                data.table = $('#import_table').val();
+                data.allRows = allRows;
+
+                console.log("data to send " + JSON.stringify(data));
+
+
+                var _id = 'mysql.' + instance;
+                ImportData(_id, data);
 
 
             });
@@ -76,6 +112,29 @@
             // reinitialize all the Materialize labels on the page if you are dynamically adding inputs:
             if (M) M.updateTextFields();
         }
+
+
+        function getDataTypes(divId) {
+            var $div = $(divId);
+            
+            var names = [];
+            $div.find('.preview_editable').each(function () {
+                var name = $(this).data('value');
+                if (name) {
+                    names.push(name);
+                } else {
+                    names.push('___ignore___');
+                }
+            });
+
+            
+
+            return names;
+        }
+
+
+
+
 
         var timeout1;
         function getTables(onChange, instance, actualValue) {
@@ -149,7 +208,7 @@
 
                         var separator = $('#import_separator').val();
                         console.log("separator " + separator);
-                        var allRows = contents.split(/\r?\n|\r/);
+                        allRows = contents.split(/\r?\n|\r/);
 
                         var separator_char;
 
@@ -189,7 +248,7 @@
                                     val = "none";
                                 }
 
-                                row2appand += '<th class = "preview_editable" data-value = "' + val + '"  data-name="datatype"  style="text-align: center" data-options="none:none;float:float;number:number;string:string;date:date"  title="select datatype" > ' + 'none' + '</th>';
+                                row2appand += '<th class = "preview_editable" data-value = "' + val + '"  data-name="datatype"  style="text-align: center" data-options="none:none;float:float;number:number;string:string;date:date"  title="select datatype" > ' + val + '</th>';
                             }
 
                             row2appand += '</tr>';
@@ -233,82 +292,6 @@
             }
         }
 
-        /*
-                function handleFileSelect(evt) {
-                    var f = evt.target.files[0];
-
-                    if (f) {
-                        var r = new FileReader();
-                        r.onload = function (e) {
-
-                            var type = $('#import_type').val();
-
-                            var contents = e.target.result;
-
-                            if (type == 1) {
-
-                                var separator = $('#import_separator').val();
-                                console.log("separator " + separator);
-                                var allRows = contents.split(/\r?\n|\r/);
-
-                                var separator_char;
-
-                                switch (separator) {
-                                    case "1": separator_char = ','; break;
-                                    case "2": separator_char = ';'; break;
-                                    default:
-                                        console.log("no separator defined " + separator);
-                                        break;
-                                }
-
-                                //var headers = allRows[0].split(separator_char);
-
-                                //console.log(JSON.stringify(headers));
-
-                                //for (var singleRow = 1; singleRow < allRows.length; singleRow++) {
-                                //    var rowCells = allRows[singleRow].split(';');
-
-                                    //console.log(JSON.stringify(rowCells));
-                                //}
-
-                                var _id = 'mysql.' + instance;
-
-                                var table = $('#import_table').val();
-                                var createcols = $('#import_CreateColumns').prop('checked');
-                                var FirstLineIsHeadline = $('#import_FirstLineIsHeadline').prop('checked');
-                                var FillUp = $('#import_FillUp').prop('checked');
-
-                                let data = {
-                                    rows: allRows,
-                                    filetype: type,
-                                    separator: separator_char,
-                                    table: table,
-                                    createcols: createcols,
-                                    FirstLineIsHeadline: FirstLineIsHeadline,
-                                    FillUp:FillUp
-                                }
-
-                                ImportData(_id, data);
-
-                            }
-                            else if (type == 2) {
-                                //var json = JSON.parse(contents);
-                                //var len = Object.keys(json).length;
-
-                                console.log("JSON not implemented yet");
-                            }
-
-
-
-
-                        }
-
-                        r.readAsText(f);
-                    }
-                }
-
-        */
-
         function onQuickEditField(e) {
             var $this = $(this);
             var attr = $this.data('name');
@@ -328,6 +311,9 @@
 
             if (options) {
                 var opt = options.split(';');
+
+                //to do: current value selected
+
                 text = '<select style="width: calc(100% - 50px); z-index: 2; display: inherit">';
                 for (var i = 0; i < opt.length; i++) {
                     var parts = opt[i].split(':');
@@ -346,6 +332,9 @@
             var $input = (options) ? $this.find('select') : $this.find('input');
 
             $this.find('.select-id-quick-edit-cancel').off('click').on('click', function (e) {
+
+                //to do: this will never be called? why?
+
                 if (timeout) clearTimeout(timeout);
                 timeout = null;
 
@@ -544,8 +533,14 @@
                     <div id="select_file"></div>
                 </div>
             </div>
-
             <div class="row">
+                <div class="col s1">
+                </div>
+                <div class="col s2">
+                    <label class="translate">import_fiel_preview</label>
+                </div>
+            </div>
+            <div >
                 <div class="grid-main-div m" style="width: 100%; overflow-y: auto" id="importfilepreview-div">
                     <table id="importfilepreview" class="filepreview-table">
                         <thead id="importfilepreviewhead"></thead>

@@ -139,36 +139,38 @@ function Disconnect() {
 async function ImportData(obj) {
 
     //csv import
-
     try {
+
+        let data = {
+            allRows: obj.message.allRows,
+            datatypes: obj.message.datatypes,
+            separator: obj.message.separator,
+            filetype: obj.message.filetype,
+            headerIsFirstLine: obj.message.headerIsFirstLine,
+            createColumns: obj.message.createColumns,
+            fillUp: obj.message.fillUp,
+            table: obj.message.table
+        };
+
+        //to do: filetype prüfen, ob wirklich csv
+        //to do: header length und datatype length must have the same length
         let StartRow = 0;
-        const rows = obj.message.rows;
-        const separator = obj.message.separator;
-        const headers = rows[0].split(separator);
-        adapter.log.debug(" headers : " + headers.length + " = " + JSON.stringify(headers));
-
         let querystring = "";
-        if (obj.message.FirstLineIsHeadline) {
-            StartRow = 1;
+        if (data.headerIsFirstLine) {
             adapter.log.debug("first line is headline");
+            const headers = data.allRows[0].split(data.separator);
+            adapter.log.debug(" headers : " + headers.length + " = " + JSON.stringify(headers));
+            StartRow = 1;
 
-            //adapter.log.debug("222 " + JSON.stringify(rows));
-
-
-            if (obj.message.createcols) {
+            if (data.createColumns) {
                 adapter.log.debug("creating columns");
-
-                querystring = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + obj.message.table + "'";
-
+                querystring = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + data.table + "'";
                 const [rows, fields] = await mysql_connection.query(querystring);
-
-                adapter.log.debug("got result: " + JSON.stringify(rows));
+                adapter.log.debug("got columns: " + JSON.stringify(rows));
 
                 if (rows.length > 0) {
-
-                    for (let i = 0; i < headers.length;i++) {
-
-                        if (headers[i].length > 0) {
+                    for (let i = 0; i < headers.length; i++) {
+                        if (headers[i].length > 0 && data.datatypes[i] != "none") {
 
                             //check if already available; if not add column
                             let bFound = false;
@@ -176,16 +178,11 @@ async function ImportData(obj) {
                                 if (headers[i] == rows[j].COLUMN_NAME) {
                                     bFound = true;
                                 }
-
                             }
                             if (!bFound) {
                                 adapter.log.debug("column to add " + headers[i]);
-
                                 //to do: spaces und andere Sonderzeichen herausfiltern
-
-                                querystring = "ALTER TABLE " + obj.message.table + " ADD " + headers[i] + " VARCHAR (50)";
-                                //to do: correct data type
-
+                                querystring = "ALTER TABLE " + obj.message.table + " ADD " + headers[i] + " " + data.datatypes[i];
                                 await mysql_connection.query(querystring);
                             }
                             else {
@@ -196,6 +193,10 @@ async function ImportData(obj) {
                 }
             }
         }
+
+        /*
+
+        
 
         //prepare query string with constant part
         let prequerystring = "INSERT INTO " + obj.message.table + " (";
@@ -364,6 +365,7 @@ async function ImportData(obj) {
             
 
         }
+    */
     }
     catch (e) {
         adapter.log.error("exception in  ImportData [" + e + "]");
