@@ -242,13 +242,13 @@
 
                                 let val;
                                 if (headers[i].length > 0) {
-                                    val = "string";
+                                    val = "varchar";
                                 }
                                 else {
                                     val = "none";
                                 }
 
-                                row2appand += '<th class = "preview_editable" data-value = "' + val + '"  data-name="datatype"  style="text-align: center" data-options="none:none;float:float;number:number;string:string;date:date"  title="select datatype" > ' + val + '</th>';
+                                row2appand += '<th class = "preview_editable" data-value = "' + val + '"  data-name="datatype"  style="text-align: center" data-options="none:none;int:int;float:float;date:date;char:char;varchar:varchar;text:text;"  title="select datatype" > ' + val + '</th>';
                             }
 
                             row2appand += '</tr>';
@@ -381,6 +381,7 @@
                         .off('click')
                         .on('click', onQuickEditField)
                         .addClass('select-id-quick-edit')
+                        .data('value',val)
                         .css('text-align', textAlign);
                 }.bind(this), 100);
             }).on('keyup', function (e) {

@@ -74,6 +74,10 @@ function startAdapter(options) {
                     adapter.log.debug("got importData");
                     await ImportData(obj);
                     break;
+                case "createTable":
+                    adapter.log.debug("got createTable");
+                    //to do
+                    break;
                 default:
                     adapter.log.error("unknown message " + obj.command);
                     break;
@@ -141,10 +145,10 @@ async function ImportData(obj) {
     //csv import
     try {
 
-        let data = {
+        const data = {
             allRows: obj.message.allRows,
             datatypes: obj.message.datatypes,
-            separator: obj.message.separator,
+            separator: "",       
             filetype: obj.message.filetype,
             headerIsFirstLine: obj.message.headerIsFirstLine,
             createColumns: obj.message.createColumns,
@@ -152,14 +156,26 @@ async function ImportData(obj) {
             table: obj.message.table
         };
 
+        switch (obj.message.separator) {
+        case "1": data.separator = ","; break;
+        case "2": data.separator = ";"; break;
+        default:
+            adapter.log.error("no separator defined " + obj.message.separator);
+            break;
+        }
+
         //to do: filetype prüfen, ob wirklich csv
         //to do: header length und datatype length must have the same length
+
+        const row0 = data.allRows[0];
+        const headers = row0.split(data.separator);
+        adapter.log.debug(" headers : " + headers.length + " = " + JSON.stringify(headers) + " " + data.separator);
+        adapter.log.debug(" datatypes : " + JSON.stringify(data.datatypes));
+
         let StartRow = 0;
         let querystring = "";
         if (data.headerIsFirstLine) {
             adapter.log.debug("first line is headline");
-            const headers = data.allRows[0].split(data.separator);
-            adapter.log.debug(" headers : " + headers.length + " = " + JSON.stringify(headers));
             StartRow = 1;
 
             if (data.createColumns) {
@@ -180,9 +196,11 @@ async function ImportData(obj) {
                                 }
                             }
                             if (!bFound) {
-                                adapter.log.debug("column to add " + headers[i]);
+                                adapter.log.debug("column to add " + headers[i] + " as " + data.datatypes[i]);
                                 //to do: spaces und andere Sonderzeichen herausfiltern
                                 querystring = "ALTER TABLE " + obj.message.table + " ADD " + headers[i] + " " + data.datatypes[i];
+
+                                adapter.log.debug(querystring);
                                 await mysql_connection.query(querystring);
                             }
                             else {
@@ -194,24 +212,17 @@ async function ImportData(obj) {
             }
         }
 
-        /*
-
-        
-
+        adapter.log.debug("start import data");
         //prepare query string with constant part
         let prequerystring = "INSERT INTO " + obj.message.table + " (";
 
-        const col2Import =[];
-
+        
         for (let i = 0; i < headers.length; i++) {
-            if (headers[i].length > 0) {
+            if (headers[i].length>0 && data.datatypes[i] != "none") {
                 if (i > 0) {
                     prequerystring += ", ";
                 }
-
                 prequerystring += headers[i];
-
-                col2Import.push(i.toString());
             }
         }
         prequerystring += ")  VALUES (";
@@ -219,14 +230,16 @@ async function ImportData(obj) {
         let LastImportDate;
         let LastImportValue =0;
 
-        for (let n = StartRow; n < rows.length; n++) {
+        for (let n = StartRow; n < data.allRows.length; n++) {
 
             //INSERT INTO table_name (column_list) VALUES(value_list);
 
-            const rowCells = rows[n].split(separator);
+            //to check: length of array must be the same as headers
 
-            if (obj.message.FillUp) {
-                //adapter.log.debug("need to fillup, but not implemented yet");
+            const rowCells = data.allRows[n].split(data.separator);
+
+            if (data.fillUp) {
+                adapter.log.debug("need to fillup");
 
                 const CurrentImportDate = new Date();
 
@@ -238,7 +251,7 @@ async function ImportData(obj) {
                 CurrentImportDate.setHours(12);
                 CurrentImportDate.setMinutes(0);
 
-                //to do make col number adjustable
+                //to do make col number for fillup adjustable 
                 const CurrentImportValue = parseFloat( RemoveChars(rowCells[1]));
                 const CurrentImportDiff = parseFloat ( RemoveChars(rowCells[3]));
 
@@ -259,6 +272,7 @@ async function ImportData(obj) {
                     for (let d = 0; d < diffDays; d++) {
                         NewValue += ValuePerDay;
                         NewDate = new Date(NewDate.getTime() + 1000 * 60 * 60 * 24);
+
                         //to do hier fehlt berechnung des Tages
                         //adapter.log.debug("interpolation day " + NewDate.toDateString() + " value " + NewValue);
 
@@ -267,105 +281,48 @@ async function ImportData(obj) {
 
                         //INSERT INTO Strom(Datum, Zaehlerstand, Verbrauch, Versorgerablese, Notiz, Kennzeichnung)  VALUES('2008-12-16', 648.8, 0, 'Nein', '', '')
 
-                        for (let j = 0; j < rowCells.length; j++) {
-                            //only values with header
-                            if (col2Import.includes(j.toString())) {
+                        //############################
+                        //prepare row
 
-                                if (j > 0) {
-                                    querystring += ", ";
-                                }
-
-                                //to do make col number adjustable
-                                if (j === 0) { // date
-                                    querystring += "'" + NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate() + "'";
-                                }
-                                else if (j === 1) { //value
-                                    querystring += NewValue;
-                                }
-                                else if (j === 3) { //value per day
-                                    querystring += ValuePerDay;
-                                }
-                                else {
-                                    querystring += "'";
-                                    querystring += rowCells[j];
-                                    querystring += "'";
-                                }
-                               
-                            }
-                        }
-                        querystring += ")";
-                        adapter.log.debug(querystring);
-
-                        const [rows, fields] = await mysql_connection.execute(querystring);
-
+                        rowCells[0] = NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate();
+                        rowCells[1] = NewValue;
+                        rowCells[3] = ValuePerDay;
+                        await WriteRow(querystring, rowCells, data.datatypes);                      
                     }
 
                     if (Math.abs(NewValue - CurrentImportValue) > 1) {
                         adapter.log.warn("calculation diff " + NewValue + " / " + CurrentImportValue);
                     }
-
-                    
-
                 }
                 else {
-                    // direkt eintragen ohne interpol
+                    // direkt eintragen ohne interpol, da erster wert
 
                     querystring = prequerystring;
 
-                    for (let j = 0; j < rowCells.length; j++) {
-                        //only values with header
-                        if (col2Import.includes(j.toString())) {
+                    //############################
+                    // prepare row
 
-                            if (j > 0) {
-                                querystring += ", ";
-                            }
+                    rowCells[0] = CurrentImportDate.getFullYear() + "-" + (CurrentImportDate.getMonth() + 1) + "-" + CurrentImportDate.getDate();
+                    rowCells[1] = CurrentImportValue;
+                    rowCells[3] = CurrentImportDiff;
 
-                            //to do make col number adjustable
-                            if (j === 0) { // date
-                                querystring += "'" + CurrentImportDate.getFullYear() + "-" + (CurrentImportDate.getMonth() + 1) + "-" + CurrentImportDate.getDate() + "'";
-                            }
-                            else if (j === 1) { //value
-                                querystring += CurrentImportValue;
-                            }
-                            else if (j === 3) { //value per day
-                                querystring += CurrentImportDiff;
-                            }
-                            else {
-                                querystring += "'";
-                                querystring += rowCells[j];
-                                querystring += "'";
-                            }
-                            
-                        }
-                    }
-                    querystring += ")";
-                    adapter.log.debug(querystring);
+                    await WriteRow(querystring, rowCells, data.datatypes);
 
-                    const [rows, fields] = await mysql_connection.execute(querystring);
                 }
                 LastImportDate = CurrentImportDate;
                 LastImportValue = CurrentImportValue;
 
             }
             else {
+
+                //immer direkt eintragen
+                adapter.log.debug("no fill up");
                 querystring = prequerystring;
 
-                for (let j in rowCells) {
-                    //only values with header
-                    if (col2Import.includes(j)) {
-                        querystring += "'";
-                        querystring += rowCells[j];
-                        querystring += "', ";
-                    }
-                }
-                querystring += ")";
-                const [rows, fields] = await mysql_connection.execute(querystring);
-               
-            }
-            
+                await WriteRow(querystring, rowCells, data.datatypes);
 
+            }
         }
-    */
     }
     catch (e) {
         adapter.log.error("exception in  ImportData [" + e + "]");
@@ -373,10 +330,59 @@ async function ImportData(obj) {
     adapter.sendTo(obj.from, obj.command, null, obj.callback);
 }
 
+
+async function WriteRow(querystring, row, datatypes) {
+
+    let cnt = 0;
+    for (let j = 0; j < row.length; j++) {
+        //only values with header
+
+        //    wenn string oder datum, dann anführungszeichen
+
+        if (datatypes[j] == "text" || datatypes[j] == "varchar" || datatypes[j] == "date") {
+
+            if (cnt > 0) {
+                querystring += ", ";
+            }
+            querystring += "'";
+            querystring += row[j];
+            querystring += "'";
+            cnt++;
+        }
+        else if (datatypes[j] == "float") {
+
+            const val = RemoveChars(row[j]);
+
+            if (cnt > 0) {
+                querystring += ", ";
+            }
+            querystring += val;
+            cnt++;
+        }
+        else if (datatypes[j] != "none") {
+            if (cnt > 0) {
+                querystring += ", ";
+            }
+            querystring += row[j];
+            cnt++;
+        }
+    }
+    querystring += ")";
+
+    adapter.log.debug("query " + querystring);
+
+    const [rows, fields] = await mysql_connection.execute(querystring);
+
+}
+
+
 function RemoveChars(input) {
 
     let output = input;
-    if (typeof input !== "undefined") {
+
+    adapter.log.debug("RemoveChars " + input + " " + typeof input);
+
+    if (typeof input === "string") {
 
         // to do: make it adjustable...
         output = input.replace('.', '');
@@ -425,10 +431,13 @@ async function HandleQuery(state) {
 
         const [rows, fields] = await mysql_connection.query(querystring);
 
-        adapter.log.debug("got result: " + JSON.stringify(rows));
+        //adapter.log.debug("got result: " + JSON.stringify(rows));
 
         if (rows.length > 0) {
             adapter.log.debug("got result: " + JSON.stringify(rows));
+
+            await adapter.setStateAsync("Result", { ack: true, val: JSON.stringify(rows)});
+
         }
     }
     catch (e) {
