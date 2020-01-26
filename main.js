@@ -76,6 +76,7 @@ function startAdapter(options) {
                     break;
                 case "createTable":
                     adapter.log.debug("got createTable");
+                    await CreateTable(obj);
                     //to do
                     break;
                 default:
@@ -140,6 +141,41 @@ function Disconnect() {
     }
 }
 
+async function CreateTable(obj) {
+
+    /*
+    CREATE TABLE Persons(
+        PersonID int,
+        LastName varchar(255),
+        FirstName varchar(255),
+        Address varchar(255),
+        City varchar(255)
+    );
+    */
+
+    try {
+
+        adapter.log.debug("create table " + obj.message.table);
+        //to do: spaces und andere Sonderzeichen herausfiltern
+
+        if (typeof obj.message.table == "string" && obj.message.table.length > 0) {
+
+            const querystring = "CREATE TABLE " + obj.message.table + " ( ID int NOT NULL AUTO_INCREMENT, PRIMARY KEY (ID) ) ";
+
+            adapter.log.debug(querystring);
+            await mysql_connection.query(querystring);
+        }
+        else {
+            adapter.log.error("create table: name not valid " + JSON.stringify(obj.message.table));
+        }
+
+    }
+    catch (e) {
+        adapter.log.error("exception in  CreateTable [" + e + "]");
+    }
+    adapter.sendTo(obj.from, obj.command, null, obj.callback);
+}
+
 async function ImportData(obj) {
 
     //csv import
@@ -199,6 +235,9 @@ async function ImportData(obj) {
                                 adapter.log.debug("column to add " + headers[i] + " as " + data.datatypes[i]);
                                 //to do: spaces und andere Sonderzeichen herausfiltern
                                 querystring = "ALTER TABLE " + obj.message.table + " ADD " + headers[i] + " " + data.datatypes[i];
+                                if (data.datatypes[i] == "varchar") {
+                                    querystring += "(255)";
+                                }
 
                                 adapter.log.debug(querystring);
                                 await mysql_connection.query(querystring);

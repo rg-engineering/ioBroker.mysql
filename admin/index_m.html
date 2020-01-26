@@ -104,8 +104,17 @@
 
             var $createtable = $('#createtable');
             $createtable.click(function () {
-                console.log('createtable not implemented yet');
+                console.log('createtable');
 
+                var _id = 'mysql.' + instance;
+
+                let data = {
+                    table: ""
+                }
+
+                data.table = $('#newtablename').val();
+
+                CreateTable(onChange,_id, data);
             });
 
             onChange(false);
@@ -142,6 +151,8 @@
                 getTables(onChange, instance, actualValue);
             }, 4000);
 
+            console.log('get tables from ' + instance);
+
             //function sendTo(_adapter_instance, command, message, callback)
             sendTo(instance, 'getTables', null, function (list) {
                 if (timeout1) {
@@ -176,6 +187,29 @@
                 console.log('data imported ');
             });
         }
+
+
+        //var timeout3;
+        function CreateTable(onChange, instance, data) {
+            //timeout3 = setTimeout(function () {
+            //    CreateTable(onChange,instance, data);
+            //}, 4000);
+
+            //function sendTo(_adapter_instance, command, message, callback)
+            sendTo(instance, 'createTable', data, function (list) {
+                //if (timeout3) {
+                //    clearTimeout(timeout2);
+                //    timeout3 = null;
+                //}
+
+                console.log('table created ');
+
+               
+                getTables(onChange, instance, data.table);
+
+            });
+        }
+
 
 
         // This will be called by the admin adapter when the user presses the save button
