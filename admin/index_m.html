@@ -171,36 +171,25 @@
             });
         }
 
-        var timeout2;
+
         function ImportData(instance, data) {
-            timeout2 = setTimeout(function () {
-                ImportData(instance, data);
-            }, 4000);
 
             //function sendTo(_adapter_instance, command, message, callback)
             sendTo(instance, 'importData', data, function (list) {
-                if (timeout2) {
-                    clearTimeout(timeout2);
-                    timeout2 = null;
-                }
+                
 
                 console.log('data imported ');
             });
         }
 
 
-        //var timeout3;
+
         function CreateTable(onChange, instance, data) {
-            //timeout3 = setTimeout(function () {
-            //    CreateTable(onChange,instance, data);
-            //}, 4000);
+
 
             //function sendTo(_adapter_instance, command, message, callback)
             sendTo(instance, 'createTable', data, function (list) {
-                //if (timeout3) {
-                //    clearTimeout(timeout2);
-                //    timeout3 = null;
-                //}
+
 
                 console.log('table created ');
 

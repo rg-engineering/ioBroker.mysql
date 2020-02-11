@@ -226,7 +226,7 @@ async function ImportData(obj) {
 
                             //check if already available; if not add column
                             let bFound = false;
-                            for (let j in rows) {
+                            for (const j in rows) {
                                 if (headers[i] == rows[j].COLUMN_NAME) {
                                     bFound = true;
                                 }
@@ -278,17 +278,26 @@ async function ImportData(obj) {
             const rowCells = data.allRows[n].split(data.separator);
 
             if (data.fillUp) {
-                adapter.log.debug("need to fillup");
+               
 
                 const CurrentImportDate = new Date();
 
                 //to do make col number adjustable
-                const sDate = rowCells[0].split('.');
-                CurrentImportDate.setDate(parseInt(sDate[0]));
-                CurrentImportDate.setMonth(parseInt(sDate[1]) - 1);
-                CurrentImportDate.setFullYear(parseInt(sDate[2]));
+                const sDate = rowCells[0].split(".");
+
+                const day = parseInt(sDate[0]);
+                const month = parseInt(sDate[1]) - 1;
+                const year = parseInt(sDate[2]);
+
+                adapter.log.debug("***** " + day + " + " + month + " + " + year); 
+
+                CurrentImportDate.setFullYear(year);
+                CurrentImportDate.setMonth(month);
+                CurrentImportDate.setDate(day);
                 CurrentImportDate.setHours(12);
                 CurrentImportDate.setMinutes(0);
+
+                adapter.log.debug("need to fillup, data " + rowCells[0] + " " + rowCells[1] + " " + rowCells[3] + " " + CurrentImportDate.toDateString());
 
                 //to do make col number for fillup adjustable 
                 const CurrentImportValue = parseFloat( RemoveChars(rowCells[1]));
@@ -296,7 +305,7 @@ async function ImportData(obj) {
 
                 if (typeof LastImportDate !== "undefined") {
 
-                    //adapter.log.debug(rowCells[0] + " last " + LastImportDate.toDateString() + " current " + CurrentImportDate.toDateString());
+                    adapter.log.debug(rowCells[0] + " last " + LastImportDate.toDateString() + " current " + CurrentImportDate.toDateString());
 
                     const diffTime = Math.abs(CurrentImportDate.getTime() - LastImportDate.getTime());
                     let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -306,14 +315,16 @@ async function ImportData(obj) {
                     let NewValue = LastImportValue;
                     let NewDate = LastImportDate;
 
-                    //adapter.log.debug("day diff " + diffDays + " value per day " + ValuePerDay + " " + CurrentImportDiff);
+                    adapter.log.debug("day diff " + diffDays + " value per day " + ValuePerDay + " " + CurrentImportDiff);
 
                     for (let d = 0; d < diffDays; d++) {
                         NewValue += ValuePerDay;
-                        NewDate = new Date(NewDate.getTime() + 1000 * 60 * 60 * 24);
 
-                        //to do hier fehlt berechnung des Tages
-                        //adapter.log.debug("interpolation day " + NewDate.toDateString() + " value " + NewValue);
+                        //const nTime = NewDate.getTime();
+                        //NewDate = new Date(nTime + (1000 * 60 * 60 * 24));
+                        NewDate.setDate(NewDate.getDate() + 1);
+                      
+                        adapter.log.debug("interpolation day " + NewDate.toDateString() + " value " + NewValue );
 
                         querystring = prequerystring;
 
@@ -335,7 +346,7 @@ async function ImportData(obj) {
                 }
                 else {
                     // direkt eintragen ohne interpol, da erster wert
-
+                    adapter.log.debug("direct, data " + rowCells[0] + " " + rowCells[1] + " " + rowCells[3] + " " + CurrentImportDate.toDateString());
                     querystring = prequerystring;
 
                     //############################
@@ -344,6 +355,9 @@ async function ImportData(obj) {
                     rowCells[0] = CurrentImportDate.getFullYear() + "-" + (CurrentImportDate.getMonth() + 1) + "-" + CurrentImportDate.getDate();
                     rowCells[1] = CurrentImportValue;
                     rowCells[3] = CurrentImportDiff;
+
+                    adapter.log.debug("***** " + rowCells[0] + " " + CurrentImportDate.toDateString());
+
 
                     await WriteRow(querystring, rowCells, data.datatypes);
 
