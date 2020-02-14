@@ -78,7 +78,8 @@
 		"import_table": "",
 		"import_FirstLineIsHeadline": true,
 		"import_CreateColumns": true,
-		"import_FillUp":  false
+		"import_FillUp": false,
+		"Queries": []
 	},
 	"objects": [],
 	"instanceObjects": []

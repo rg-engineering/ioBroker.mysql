@@ -498,6 +498,34 @@ async function HandleQuery(state) {
     }
 }
 
+async function HandleQueries() {
+
+    try {
+
+        for (let i = 0; i < adapter.config.queries.length; i++) {
+
+            const querystring = adapter.config.queries[i].query;
+
+            adapter.log.debug("query: " + querystring);
+
+            const [rows, fields] = await mysql_connection.query(querystring);
+
+            //adapter.log.debug("got result: " + JSON.stringify(rows));
+
+            if (rows.length > 0) {
+                adapter.log.debug("got result: " + JSON.stringify(rows));
+
+                await adapter.setStateAsync("Result_" + adapter.config.queries[i].name, { ack: true, val: JSON.stringify(rows) });
+
+            }
+        }
+    }
+    catch (e) {
+        adapter.log.error("exception in  HandleQuery [" + e + "]");
+    }
+}
+
+
 //#######################################
 //
 // create all necessary datapaoints
@@ -533,6 +561,43 @@ async function CreateDatepoints() {
             native: { id: "Result" }
         });
 
+
+        if (adapter.config.queries != null && typeof adapter.config.queries != "undefined" && adapter.config.queries.length > 0) {
+
+            await adapter.setObjectNotExistsAsync("ExecuteQueries", {
+                type: "state",
+                common: {
+                    name: "Result",
+                    type: "boolean",
+                    role: "query",
+                    unit: "",
+                    read: true,
+                    write: true
+                },
+                native: { id: "ExecuteQueries" }
+            });
+
+
+
+            for (let i = 0; i < adapter.config.queries.length; i++) {
+
+                await adapter.setObjectNotExistsAsync("Result_"+adapter.config.queries[i].name, {
+                    type: "state",
+                    common: {
+                        name: "Result",
+                        type: "string",
+                        role: "query",
+                        unit: "",
+                        read: true,
+                        write: false
+                    },
+                    native: { id: "Result_" + adapter.config.queries[i].name }
+                });
+
+            }
+
+        }
+
     }
     catch (e) {
         adapter.log.error("exception in CreateDatapoints [" + e + "]");
@@ -552,6 +617,10 @@ function SubscribeStates(callback) {
     try {
 
         adapter.subscribeStates("Query");
+
+        if (adapter.config.queries != null && typeof adapter.config.queries != "undefined" && adapter.config.queries.length > 0) {
+            adapter.subscribeStates("ExecuteQueries");
+        }
         
         adapter.log.debug("#subscribtion finished");
     }
@@ -574,16 +643,15 @@ async function HandleStateChange(id, state) {
             //first set ack flag
             await adapter.setStateAsync(id, { ack: true });
 
-            //execute only if ack not set yet
-            if (id.includes("Query")) {
-                await HandleQuery(state);
+            if (id.includes("ExecuteQueries")) {
+                await HandleQueries();
             }
 
+            //execute only if ack not set yet
+            else if (id.includes("Query")) {
+                await HandleQuery(state);
+            }
         }
-
-        
-
-
     }
     catch (e) {
         adapter.log.error("exception in HandleStateChange [" + e + "]");
