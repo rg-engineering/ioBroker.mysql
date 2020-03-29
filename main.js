@@ -282,8 +282,8 @@ async function ImportData(obj) {
 
                 const CurrentImportDate = new Date();
 
-                //to do make col number adjustable
                 const sDate = rowCells[0].split(".");
+                //to do make col number adjustab
 
                 const day = parseInt(sDate[0]);
                 const month = parseInt(sDate[1]) - 1;
@@ -313,7 +313,7 @@ async function ImportData(obj) {
 
                     const ValuePerDay = CurrentImportDiff / diffDays;
                     let NewValue = LastImportValue;
-                    let NewDate = LastImportDate;
+                    const NewDate = LastImportDate;
 
                     adapter.log.debug("day diff " + diffDays + " value per day " + ValuePerDay + " " + CurrentImportDiff);
 
@@ -504,19 +504,42 @@ async function HandleQueries() {
 
         for (let i = 0; i < adapter.config.queries.length; i++) {
 
-            const querystring = adapter.config.queries[i].query;
+            if (adapter.config.queries[i].fillup) {
 
-            adapter.log.debug("query: " + querystring);
+                await FillUp(i);
 
-            const [rows, fields] = await mysql_connection.query(querystring);
+            }
+            else {
 
-            //adapter.log.debug("got result: " + JSON.stringify(rows));
 
-            if (rows.length > 0) {
+                let querystring = adapter.config.queries[i].query;
+
+                if (adapter.config.queries[i].withInput) {
+                    const values = await adapter.getStateAsync("Input_" + adapter.config.queries[i].name);
+
+                    const sValues = values.val.split(",");
+
+                    for (let n = 0; n < sValues.length; n++) {
+
+                        const searchstring = "#" + (n + 1);
+
+                        querystring = querystring.replace(searchstring, sValues[n]);
+                    }
+                }
+
+
+                adapter.log.debug("query: " + querystring);
+
+                const [rows, fields] = await mysql_connection.query(querystring);
+
                 adapter.log.debug("got result: " + JSON.stringify(rows));
 
-                await adapter.setStateAsync("Result_" + adapter.config.queries[i].name, { ack: true, val: JSON.stringify(rows) });
+                if (rows.length > 0) {
+                    adapter.log.debug("got result: " + JSON.stringify(rows));
 
+                    await adapter.setStateAsync("Result_" + adapter.config.queries[i].name, { ack: true, val: JSON.stringify(rows) });
+
+                }
             }
         }
     }
@@ -524,6 +547,58 @@ async function HandleQueries() {
         adapter.log.error("exception in  HandleQuery [" + e + "]");
     }
 }
+
+async function FillUp(query) {
+
+    try {
+
+        //find out which table
+        //INSERT INTO Heizung (Datum, Zaehlerstand, Verbrauch) VALUES ('#1', #2, #3)
+        const searchstring = "INTO";
+        const start = query.indexOf(searchstring) + searchstring.length;
+        const ende = query.indexOf("(", start);
+
+        if (start > 0 && ende > 0 && ende > start) {
+            const tablename = query.substring(start, ende - start).trim();
+            adapter.log.debug("table name to fill up is " + tablename);
+
+            //get last entry
+            //select * from Heizung order BY ID desc limit 1
+            const querystring = "select * from " + tablename + "order BY ID desc limit 1";
+            adapter.log.debug("query: " + querystring);
+
+            const [rows, fields] = await mysql_connection.query(querystring);
+
+            adapter.log.debug("got result: " + JSON.stringify(rows));
+
+            if (rows.length > 0) {
+                adapter.log.debug("got result: " + JSON.stringify(rows));
+
+                //calculate difference to current dataset
+
+
+
+
+                //claculate value per day
+
+                //loop over all necessary data sets
+            }
+            else {
+                adapter.log.error("no entry found for " + querystring);
+            }
+
+        }
+        else {
+            adapter.log.error("table name not found " + query + " to fillup");
+        }
+
+    }
+    catch (e) {
+        adapter.log.error("exception in  FillUp [" + e + "]");
+    }
+
+}
+
 
 
 //#######################################
@@ -594,6 +669,21 @@ async function CreateDatepoints() {
                     native: { id: "Result_" + adapter.config.queries[i].name }
                 });
 
+                if (adapter.config.queries[i].withInput) {
+                    await adapter.setObjectNotExistsAsync("Input_" + adapter.config.queries[i].name, {
+                        type: "state",
+                        common: {
+                            name: "Input",
+                            type: "string",
+                            role: "query",
+                            unit: "",
+                            read: true,
+                            write: true
+                        },
+                        native: { id: "Input_" + adapter.config.queries[i].name }
+                    });
+                }
+
             }
 
         }
@@ -620,6 +710,14 @@ function SubscribeStates(callback) {
 
         if (adapter.config.queries != null && typeof adapter.config.queries != "undefined" && adapter.config.queries.length > 0) {
             adapter.subscribeStates("ExecuteQueries");
+
+            for (let i = 0; i < adapter.config.queries.length; i++) {
+
+                if (adapter.config.queries[i].withInput) {
+                    adapter.subscribeStates("Input_" + adapter.config.queries[i].name);
+                }
+            }
+
         }
         
         adapter.log.debug("#subscribtion finished");

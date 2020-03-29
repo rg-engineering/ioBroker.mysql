@@ -228,18 +228,6 @@
                 "pl": "24 godziny",
                 "zh-cn": "24小时"
             },
-            "mysqlinstance": {
-                "en": "mysql instance",
-                "de": "mysql-Instanz",
-                "ru": "экземпляр mysql",
-                "pt": "instância mysql",
-                "nl": "mysql-instantie",
-                "fr": "instance de mysql",
-                "it": "istanza mysql",
-                "es": "instancia de mysql",
-                "pl": "instancja mysql",
-                "zh-cn": "mysql实例"
-            },
             "time_interval": {
                 "en": "Time interval",
                 "de": "Zeitintervall",
@@ -954,325 +942,318 @@
 
                     console.log("ShowChart mysql begin (" + widgetID + ")");
 
-                    if (!data || !data.mysqlinstance) {
-                        console.log("keine instanz  (" + widgetID + ")");
-                        $div.html("<br> <center> <font color='red'> no instance for mysql specified </font> </center></br>");
+
+
+                    SetMarkingColor(data.markingcolor);
+
+                    var dateMin = -1;
+                    var dateMax = -1;
+
+                    var values = [];
+                    var maxY = -9999;
+                    var minY = 9999;
+
+                    try {
+                        var oid_value = data.oid_value;
+                        var oData = JSON.parse(vis.states[oid_value + '.val']);
+
+                        if (oData === null || typeof oData == "undefined" || oData.length < 1) {
+                            $div.html("<br> <center> <font color='red'>no data available yet for mysql</font> </center></br>");
+                            return;
+                        }
+
+
+                        //console.log("oData " + oData.length);
+                        //console.log(JSON.stringify(oData));
+
+                        var $sel = vis.binds.mysql.setup.datasel[data.valueselect];
+
+                        console.log("sel " + $sel);
+
+
+                        for (var i = 0; i < oData.length; i++) {
+                            //[{"time":"06:08","value":0},{"time":"07:08","value":60},{"time":"08:08","value":181},{"time":"09:08","value":401},{"time":"10:08","value":1917},{"time":"11:08","value":3839},{"time":"12:08","value":5905},{"time":"13:08","value":8025},{"time":"14:08","value":10052},{"time":"15:08","value":11844},{"time":"16:08","value":13159},{"time":"17:08","value":13773},{"time":"18:08","value":13875},{"time":"19:08","value":13911},{"time":"20:08","value":13911}] kW
+                            //[{ "date": "2017-07-27", "value": 4045 }, { "date": "2017-07-28", "value": 10050 }, { "date": "2017-07-29", "value": 10442 }, { "date": "2017-07-30", "value": 13448 }, { "date": "2017-07-31", "value": 13476 }, { "date": "2017-08-01", "value": 12294 }, { "date": "2017-08-02", "value": 9084 }, { "date": "2017-08-03", "value": 3626 }, { "date": "2017-08-04", "value": 8504 }, { "date": "2017-08-05", "value": 12037 }, { "date": "2017-08-06", "value": 9725 }, { "date": "2017-08-07", "value": 13577 }, { "date": "2017-08-08", "value": 13310 }, { "date": "2017-08-09", "value": 12120 }, { "date": "2017-08-10", "value": 1391 }, { "date": "2017-08-11", "value": 2447 }, { "date": "2017-08-12", "value": 5659 }, { "date": "2017-08-13", "value": 5388 }, { "date": "2017-08-14", "value": 11364 }, { "date": "2017-08-15", "value": 12985 }, { "date": "2017-08-16", "value": 7504 }, { "date": "2017-08-17", "value": 9294 }, { "date": "2017-08-18", "value": 8594 }, { "date": "2017-08-19", "value": 10459 }, { "date": "2017-08-20", "value": 7991 }, { "date": "2017-08-21", "value": 10881 }, { "date": "2017-08-22", "value": 9715 }, { "date": "2017-08-23", "value": 13911 }, { "date": "2017-08-24", "value": 9016 }, { "date": "2017-08-25", "value": 11051 }, { "date": "2017-08-26", "value": 155 }]
+                            //[{"month":"2016-09","value":17886174},{"month":"2016-10","value":17973503},{"month":"2016-11","value":18020416},{"month":"2016-12","value":18052202},{"month":"2017-01","value":18077080},{"month":"2017-02","value":18171050},{"month":"2017-03","value":18384397},{"month":"2017-04","value":18602474},{"month":"2017-05","value":18909431},{"month":"2017-06","value":19236280},{"month":"2017-07","value":19522862},{"month":"2017-08","value":19754944}]
+                            //[{"year":"2016","value":18052202},{"year":"2017","value":19754944}]
+
+                            if ($sel == 1) {
+                                var oVals = oData[i];
+                                var sDate = oVals["time"];
+                                var value = parseInt(oVals["value"], 10);
+
+
+
+
+                                var DateArray = sDate.split(":");
+                                var minute = parseInt(DateArray[1], 10);
+                                var hour = parseInt(DateArray[0], 10);
+
+                                var oDate = new Date();
+                                oDate.setHours(hour);
+                                oDate.setMinutes(minute);
+
+                                if (value < minY) minY = value;
+                                if (value > maxY) maxY = value;
+
+                                //console.log(oDate.toString() + " : " + diff);
+
+                                var date = oDate.getTime();
+
+                                if (dateMin === -1) {
+                                    dateMin = date;
+                                }
+                                dateMax = date;
+
+                                values.push([oDate, value]);
+                                console.log("push " + oDate.toDateString() + " : " + value);
+                            }
+                            else if ($sel == 2) {
+                                var oVals = oData[i];
+                                var sDate = oVals["date"];
+                                var value = parseInt(oVals["value"]);
+
+                                //2017-08-12
+
+                                var DateArray = sDate.split("-");
+                                var day = parseInt(DateArray[2], 10);
+                                var month = parseInt(DateArray[1], 10);
+                                var year = parseInt(DateArray[0], 10);
+
+                                month--;
+
+                                var oDate = new Date(year, month, day, 12, 0, 0, 0);
+
+                                if (value < minY) minY = value;
+                                if (value > maxY) maxY = value;
+
+                                //console.log(oDate.toDateString() + " : " + value);
+                                var date = oDate.getTime();
+
+                                if (dateMin === -1) {
+                                    dateMin = date;
+                                }
+                                dateMax = date;
+                                values.push([oDate, value]);
+                                console.log("push " + oDate.toDateString() + " : " + value);
+                            }
+                            else if ($sel == 3) {
+                                var oVals = oData[i];
+                                var sDate = oVals["month"];
+                                var value = parseInt(oVals["value"], 10);
+
+                                //2016-09
+
+                                //console.log(sDate);
+                                //on new android app this goas fail; don't know why...
+                                //var month = parseInt(sDate.substring(5, 7));
+                                //var year = parseInt(sDate.substring(0, 4));
+
+                                var DateArray = sDate.split("-");
+                                var month = parseInt(DateArray[1], 10);
+                                var year = parseInt(DateArray[0], 10);
+
+                                console.log("array " + DateArray[0] + " / " + DateArray[1]);
+
+                                month--;
+
+                                //mid of month
+                                var oDate = new Date(year, month, 15, 12, 0, 0, 0);
+                                if (value < minY) minY = value;
+                                if (value > maxY) maxY = value;
+
+                                var date = oDate.getTime();
+                                if (dateMin === -1) {
+                                    dateMin = date;
+                                }
+                                dateMax = date;
+                                values.push([oDate, value]);
+
+                                console.log("push " + oDate.toDateString() + " : " + value);
+                            }
+                            else if ($sel == 4) {
+                                var oVals = oData[i];
+                                var year = parseInt(oVals["year"], 10);
+                                var value = parseInt(oVals["value"], 10);
+
+                                //2016
+
+                                // mid of year
+                                var oDate = new Date(year, 5, 30, 12, 0, 0, 0);
+                                if (value < minY) minY = value;
+                                if (value > maxY) maxY = value;
+
+                                var date = oDate.getTime();
+                                if (dateMin === -1) {
+                                    dateMin = date;
+                                }
+                                dateMax = date;
+
+                                values.push([oDate, value]);
+
+                                console.log("push " + oDate.toDateString() + " : " + value);
+
+                            }
+                        }
+                    } catch (e) {
+                        console.log('exception catch in parse data [' + e + ']');
                     }
-                    
-                    
+                    var barwidth = 0;
+                    if ($sel == 1) {
+                        barwidth = 1000 * 60 * 60 * 0.25; //0,25 h
+                    }
+                    else if ($sel == 2) {
+                        barwidth = 1000 * 60 * 60 * 12; //12 h
+                    }
+                    else if ($sel == 3) {
+                        barwidth = 1000 * 60 * 60 * 24 * 15; //15 days
+                    }
+                    else if ($sel == 4) {
+                        barwidth = 1000 * 60 * 60 * 24 * 182; //365/2=182 days
+                    }
+                    console.log("barwidth = " + barwidth); // in ms
+                    //sbfspot.0.2000562095.history.last30Days
 
-                    else {
+                    /*
+                    var ticksX = data.ticksonxaxix > 0 ? parseInt(data.ticksonxaxix, 10) : 5;
 
-                        SetMarkingColor(data.markingcolor);
-
-                        var dateMin = -1;
-                        var dateMax = -1;
-
-                        var values = [];
-                        var maxY = -9999;
-                        var minY = 9999;
-
-                        try {
-                            var oid_value = data.oid_value;
-                            var oData = JSON.parse(vis.states[oid_value + '.val']);
-
-                            if (oData === null || typeof oData == "undefined" || oData.length < 1) {
-                                $div.html("<br> <center> <font color='red'>no data available yet for mysql</font> </center></br>");
-                                return;
-                            }
-
-
-                            //console.log("oData " + oData.length);
-                            //console.log(JSON.stringify(oData));
-
-                            var $sel = vis.binds.mysql.setup.datasel[data.valueselect];
-
-                            console.log("sel " + $sel);
-
-                            
-                            for (var i = 0; i < oData.length; i++) {
-                                //[{"time":"06:08","value":0},{"time":"07:08","value":60},{"time":"08:08","value":181},{"time":"09:08","value":401},{"time":"10:08","value":1917},{"time":"11:08","value":3839},{"time":"12:08","value":5905},{"time":"13:08","value":8025},{"time":"14:08","value":10052},{"time":"15:08","value":11844},{"time":"16:08","value":13159},{"time":"17:08","value":13773},{"time":"18:08","value":13875},{"time":"19:08","value":13911},{"time":"20:08","value":13911}] kW
-                                //[{ "date": "2017-07-27", "value": 4045 }, { "date": "2017-07-28", "value": 10050 }, { "date": "2017-07-29", "value": 10442 }, { "date": "2017-07-30", "value": 13448 }, { "date": "2017-07-31", "value": 13476 }, { "date": "2017-08-01", "value": 12294 }, { "date": "2017-08-02", "value": 9084 }, { "date": "2017-08-03", "value": 3626 }, { "date": "2017-08-04", "value": 8504 }, { "date": "2017-08-05", "value": 12037 }, { "date": "2017-08-06", "value": 9725 }, { "date": "2017-08-07", "value": 13577 }, { "date": "2017-08-08", "value": 13310 }, { "date": "2017-08-09", "value": 12120 }, { "date": "2017-08-10", "value": 1391 }, { "date": "2017-08-11", "value": 2447 }, { "date": "2017-08-12", "value": 5659 }, { "date": "2017-08-13", "value": 5388 }, { "date": "2017-08-14", "value": 11364 }, { "date": "2017-08-15", "value": 12985 }, { "date": "2017-08-16", "value": 7504 }, { "date": "2017-08-17", "value": 9294 }, { "date": "2017-08-18", "value": 8594 }, { "date": "2017-08-19", "value": 10459 }, { "date": "2017-08-20", "value": 7991 }, { "date": "2017-08-21", "value": 10881 }, { "date": "2017-08-22", "value": 9715 }, { "date": "2017-08-23", "value": 13911 }, { "date": "2017-08-24", "value": 9016 }, { "date": "2017-08-25", "value": 11051 }, { "date": "2017-08-26", "value": 155 }]
-                                //[{"month":"2016-09","value":17886174},{"month":"2016-10","value":17973503},{"month":"2016-11","value":18020416},{"month":"2016-12","value":18052202},{"month":"2017-01","value":18077080},{"month":"2017-02","value":18171050},{"month":"2017-03","value":18384397},{"month":"2017-04","value":18602474},{"month":"2017-05","value":18909431},{"month":"2017-06","value":19236280},{"month":"2017-07","value":19522862},{"month":"2017-08","value":19754944}]
-                                //[{"year":"2016","value":18052202},{"year":"2017","value":19754944}]
-
-                                if ($sel == 1) {
-                                    var oVals = oData[i];
-                                    var sDate = oVals["time"];
-                                    var value = parseInt(oVals["value"], 10);
-
-
-
-
-                                    var DateArray = sDate.split(":");
-                                    var minute = parseInt(DateArray[1], 10);
-                                    var hour = parseInt(DateArray[0], 10);
-
-                                    var oDate = new Date();
-                                    oDate.setHours(hour);
-                                    oDate.setMinutes(minute);
-
-                                    if (value < minY) minY = value;
-                                    if (value > maxY) maxY = value;
-
-                                    //console.log(oDate.toString() + " : " + diff);
-
-                                    var date = oDate.getTime();
-
-                                    if (dateMin === -1) {
-                                        dateMin = date;
-                                    }
-                                    dateMax = date;
-
-                                    values.push([oDate, value]);
-                                    console.log("push " + oDate.toDateString() + " : " + value);
-                                }
-                                else if ($sel == 2) {
-                                    var oVals = oData[i];
-                                    var sDate = oVals["date"];
-                                    var value = parseInt(oVals["value"]);
-
-                                    //2017-08-12
-
-                                    var DateArray = sDate.split("-");
-                                    var day = parseInt(DateArray[2], 10);
-                                    var month = parseInt(DateArray[1], 10);
-                                    var year = parseInt(DateArray[0], 10);
-
-                                    month--;
-
-                                    var oDate = new Date(year, month, day, 12, 0, 0, 0);
-
-                                    if (value < minY) minY = value;
-                                    if (value > maxY) maxY = value;
-
-                                    //console.log(oDate.toDateString() + " : " + value);
-                                    var date = oDate.getTime();
-
-                                    if (dateMin === -1) {
-                                        dateMin = date;
-                                    }
-                                    dateMax = date;
-                                    values.push([oDate, value]);
-                                    console.log("push " + oDate.toDateString() + " : " + value);
-                                }
-                                else if ($sel == 3) {
-                                    var oVals = oData[i];
-                                    var sDate = oVals["month"];
-                                    var value = parseInt(oVals["value"], 10);
-
-                                    //2016-09
-
-                                    //console.log(sDate);
-                                    //on new android app this goas fail; don't know why...
-                                    //var month = parseInt(sDate.substring(5, 7));
-                                    //var year = parseInt(sDate.substring(0, 4));
-
-                                    var DateArray = sDate.split("-");
-                                    var month = parseInt(DateArray[1], 10);
-                                    var year = parseInt(DateArray[0], 10);
-
-                                    console.log("array " + DateArray[0] + " / " + DateArray[1]);
-
-                                    month--;
-
-                                    //mid of month
-                                    var oDate = new Date(year, month, 15, 12, 0, 0, 0);
-                                    if (value < minY) minY = value;
-                                    if (value > maxY) maxY = value;
-
-                                    var date = oDate.getTime();
-                                    if (dateMin === -1) {
-                                        dateMin = date;
-                                    }
-                                    dateMax = date;
-                                    values.push([oDate, value]);
-
-                                    console.log("push " + oDate.toDateString() + " : " + value);
-                                }
-                                else if ($sel == 4) {
-                                    var oVals = oData[i];
-                                    var year = parseInt(oVals["year"], 10);
-                                    var value = parseInt(oVals["value"], 10);
-
-                                    //2016
-
-                                    // mid of year
-                                    var oDate = new Date(year, 5, 30, 12, 0, 0, 0);
-                                    if (value < minY) minY = value;
-                                    if (value > maxY) maxY = value;
-
-                                    var date = oDate.getTime();
-                                    if (dateMin === -1) {
-                                        dateMin = date;
-                                    }
-                                    dateMax = date;
-
-                                    values.push([oDate, value]);
-
-                                    console.log("push " + oDate.toDateString() + " : " + value);
-
-                                }
-                            }
-                        } catch (e) {
-                            console.log('exception catch in parse data [' + e + ']');
-                        }
-                        var barwidth = 0;
-                        if ($sel == 1) {
-                            barwidth = 1000 * 60 * 60 * 0.25; //0,25 h
-                        }
-                        else if ($sel == 2) {
-                            barwidth = 1000 * 60 * 60 * 12; //12 h
-                        }
-                        else if ($sel == 3) {
-                            barwidth = 1000 * 60 * 60 * 24 * 15; //15 days
-                        }
-                        else if ($sel == 4) {
-                            barwidth = 1000 * 60 * 60 * 24 * 182; //365/2=182 days
-                        }
-                        console.log("barwidth = " + barwidth); // in ms
-                        //sbfspot.0.2000562095.history.last30Days
-
-                        /*
-                        var ticksX = data.ticksonxaxix > 0 ? parseInt(data.ticksonxaxix, 10) : 5;
-
-                        if (ticksX > values.length) {
-                            ticksX = values.length;
-                            console.log('reduce ticks on X to ' + ticksX);
-                        }
-                        */
-                        $.plot($div,
-                            [{
-                                data: values,
-                                color: data.graphcolor,
-                                label: data.graphName,
-                                xaxis: 1,
-                                yaxis: 1,
-                                lines: { show: false },
-                                bars:
-                                {
-                                    show: true,
-                                    barWidth: [barwidth, true],
-                                    align: "center",
-                                    horizontal: false
-                                }
-                            },
-
-
-                            ],
+                    if (ticksX > values.length) {
+                        ticksX = values.length;
+                        console.log('reduce ticks on X to ' + ticksX);
+                    }
+                    */
+                    $.plot($div,
+                        [{
+                            data: values,
+                            color: data.graphcolor,
+                            label: data.graphName,
+                            xaxis: 1,
+                            yaxis: 1,
+                            lines: { show: false },
+                            bars:
                             {
-
-                                xaxes:
-                                    [{
-                                        axisLabelUseCanvas: true,
-                                        axisLabelColour: 'orange',
-
-                                        show: data.withxaxix,
-                                        mode: "time",
-                                        timeBase: "milliseconds",
-                                        tickLength: 5,
-
-                                        min: dateMin,
-                                        max: dateMax,
-                                        //ticks: data.ticksonxaxix > 0 ? parseInt(data.ticksonxaxix, 10) : 5,
-                                        ticks: CalcTicks4X,
-
-                                        autoScale: "none",
-                                        timeformat: data.graphDateFormat,
-                                        monthNames: ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
-                                        color: data.tickscolor,
-                                        tickColor: data.tickscolor,
-                                        font: {
-
-                                            size: data.LabelFontSize,
-                                            lineHeight: 13,
-                                            style: "normal", //"italic",
-                                            weight: "bold",
-                                            family: data.LabelFontFamily,
-                                            variant: "small-caps",
-                                            color: data.axislabelcolor,
-                                        },
-                                        timezone: "browser"
-                                    },
-
-                                    ],
-                                yaxes:
-                                    [{
-                                        axisLabelUseCanvas: true,
-                                        axisLabelColour: 'orange',
-
-                                        show: data.withyaxix,
-                                        max: maxY,
-                                        min: minY,
-                                        autoScale: "none", // Available modes: "none", "loose", "exact"
-                                        showTickLabels: "major",
-                                        alignTicksWithAxis: 1,
-                                        position: 'left',
-                                        //ticks: 3,
-
-                                        tickLength: parseFloat(data.tickLength),            //20, // size in pixels of major tick marks
-                                        showMinorTicks: data.showMinorTicks,    //false, // true = show minor tick marks, false = hide minor tick marks
-                                        showTicks: data.showTicks,              //true, // true = show tick marks, false = hide all tick marks
-                                        tickDecimals: data.tickDecimals,        //1, // no. of decimals, null means auto
-                                        tickSize: data.tickSize,                //3, // number or [number, "unit"]
-                                        minTickSize: data.minTickSize,          //1, // number or [number, "unit"]
-
-                                        color: data.coloraxis,
-                                        tickColor: data.coloraxis,
-
-                                        labelWidth: parseFloat(data.labelwidth),
-                                        font: {
-                                            size: data.LabelFontSize,
-                                            lineHeight: 13,
-                                            style: "normal", //"italic",
-                                            weight: "bold",
-                                            family: data.LabelFontFamily,
-                                            variant: "small-caps",
-                                            color: data.colorticklabel,
-
-                                        },
-                                        tickFormatter: xwhFormatter
-                                    },
-
-                                    ],
-                                grid:
-                                {
-                                    markings: data.withmarking ? GridMarkings : null,
-
-                                    // backgroundColor: data.nobgcolor ? null : { colors: ["#fff", "#eee"] },
-                                    backgroundColor: data.nobgcolor ? null : data.bgcolor,
-                                    borderWidth:  parseFloat(data.borderWidth), //data.withborder,
-                                    borderColor: data.bordercolor,
-                                    margin: 1,
-                                    /*
-                                    borderWidth: {
-                                        top: data.withborder ? 1 : 0,
-                                        right: data.withborder ? 1 : 0,
-                                        bottom: data.withborder ? 2 : 0,
-                                        left: data.withborder ? 2 : 0
-                                    },*/
-
-                                },
-                                legend: {
-                                    show: data.withlegend,
-                                    labelFormatter: legendformater,
-                                    //labelBoxBorderColor: color,
-                                    //noColumns: number,
-                                    position: data.legendposition,
-                                    //margin: number of pixels or [x margin, y margin]
-                                    backgroundColor: null,
-                                    backgroundOpacity: 0,
-                                    container: null,
-                                    sorted: false
-                                }
+                                show: true,
+                                barWidth: [barwidth, true],
+                                align: "center",
+                                horizontal: false
                             }
-                        );
+                        },
 
 
-                    }
+                        ],
+                        {
+
+                            xaxes:
+                                [{
+                                    axisLabelUseCanvas: true,
+                                    axisLabelColour: 'orange',
+
+                                    show: data.withxaxix,
+                                    mode: "time",
+                                    timeBase: "milliseconds",
+                                    tickLength: 5,
+
+                                    min: dateMin,
+                                    max: dateMax,
+                                    //ticks: data.ticksonxaxix > 0 ? parseInt(data.ticksonxaxix, 10) : 5,
+                                    ticks: CalcTicks4X,
+
+                                    autoScale: "none",
+                                    timeformat: data.graphDateFormat,
+                                    monthNames: ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+                                    color: data.tickscolor,
+                                    tickColor: data.tickscolor,
+                                    font: {
+
+                                        size: data.LabelFontSize,
+                                        lineHeight: 13,
+                                        style: "normal", //"italic",
+                                        weight: "bold",
+                                        family: data.LabelFontFamily,
+                                        variant: "small-caps",
+                                        color: data.axislabelcolor,
+                                    },
+                                    timezone: "browser"
+                                },
+
+                                ],
+                            yaxes:
+                                [{
+                                    axisLabelUseCanvas: true,
+                                    axisLabelColour: 'orange',
+
+                                    show: data.withyaxix,
+                                    max: maxY,
+                                    min: minY,
+                                    autoScale: "none", // Available modes: "none", "loose", "exact"
+                                    showTickLabels: "major",
+                                    alignTicksWithAxis: 1,
+                                    position: 'left',
+                                    //ticks: 3,
+
+                                    tickLength: parseFloat(data.tickLength),            //20, // size in pixels of major tick marks
+                                    showMinorTicks: data.showMinorTicks,    //false, // true = show minor tick marks, false = hide minor tick marks
+                                    showTicks: data.showTicks,              //true, // true = show tick marks, false = hide all tick marks
+                                    tickDecimals: data.tickDecimals,        //1, // no. of decimals, null means auto
+                                    tickSize: data.tickSize,                //3, // number or [number, "unit"]
+                                    minTickSize: data.minTickSize,          //1, // number or [number, "unit"]
+
+                                    color: data.coloraxis,
+                                    tickColor: data.coloraxis,
+
+                                    labelWidth: parseFloat(data.labelwidth),
+                                    font: {
+                                        size: data.LabelFontSize,
+                                        lineHeight: 13,
+                                        style: "normal", //"italic",
+                                        weight: "bold",
+                                        family: data.LabelFontFamily,
+                                        variant: "small-caps",
+                                        color: data.colorticklabel,
+
+                                    },
+                                    tickFormatter: xwhFormatter //to do andere formatter 
+                                },
+
+                                ],
+                            grid:
+                            {
+                                markings: data.withmarking ? GridMarkings : null,
+
+                                // backgroundColor: data.nobgcolor ? null : { colors: ["#fff", "#eee"] },
+                                backgroundColor: data.nobgcolor ? null : data.bgcolor,
+                                borderWidth: parseFloat(data.borderWidth), //data.withborder,
+                                borderColor: data.bordercolor,
+                                margin: 1,
+                                /*
+                                borderWidth: {
+                                    top: data.withborder ? 1 : 0,
+                                    right: data.withborder ? 1 : 0,
+                                    bottom: data.withborder ? 2 : 0,
+                                    left: data.withborder ? 2 : 0
+                                },*/
+
+                            },
+                            legend: {
+                                show: data.withlegend,
+                                labelFormatter: legendformater,
+                                //labelBoxBorderColor: color,
+                                //noColumns: number,
+                                position: data.legendposition,
+                                //margin: number of pixels or [x margin, y margin]
+                                backgroundColor: null,
+                                backgroundOpacity: 0,
+                                container: null,
+                                sorted: false
+                            }
+                        }
+                    );
+
+
+
                 };
 
-                if (data.mysqlinstance) {
+                if (oid_value) {
 
                     var oid_value = data.oid_value;
                     console.log("bind " + oid_value);
@@ -1290,7 +1271,7 @@
                     }
                 }
                 else {
-                    console.log("instance not set ");
+                    console.log("oid not set ");
                 }
                 update();
 
@@ -1314,10 +1295,10 @@
 
 
             //then copy new values into oid
-            if ( (fields.indexOf("mysqlinstance") > -1) || fields.indexOf("valueselect") > -1) {
+            if (  fields.indexOf("valueselect") > -1) {
 
                 
-                var sInstance = vis.widgets[widgetID].data.mysqlinstance;
+                
                 var sValueSet = "today";
 
 
@@ -1350,17 +1331,6 @@
                     default: break;
                 }
 
-                console.log("calc new oids,  Instance " + sInstance + " " + sValueSet);
-
-                vis.views[view].widgets[widgetID].data.oid_value = sInstance  + ".history." + sValueSet;
-                vis.widgets[widgetID].data.oid_value = sInstance  + ".history." + sValueSet;
-
-
-
-
-
-
-
             }
 
             return changed;
@@ -1382,7 +1352,7 @@
         data-vis-type="mysql"
         data-vis-update-style="true"
         data-vis-prev='<img src="widgets/mysql/img/Prev_tplmysql.png"></img>'
-        data-vis-attrs="mysqlinstance/mysql/onInstanceChanged;time_interval[30 minutes]/select,1 second,10 seconds,30 seconds,1 minute,2 minutes,5 minutes,10 minutes,30 minutes,1 hour,2 hours,4 hours,8 hours,12 hours,24 hours;valueselect[sel_today]/select,sel_today,sel_last30days,sel_last12months,sel_years/onInstanceChanged;"
+        data-vis-attrs="time_interval[30 minutes]/select,1 second,10 seconds,30 seconds,1 minute,2 minutes,5 minutes,10 minutes,30 minutes,1 hour,2 hours,4 hours,8 hours,12 hours,24 hours;valueselect[sel_today]/select,sel_today,sel_last30days,sel_last12months,sel_years/onInstanceChanged;"
        
         data-vis-attrs0="withxaxix[true]/checkbox;axislabelcolor[#ffffff]/color;tickscolor[#ffffff]/color;LabelFontSize[8];LabelFontFamily[Arial]/fontname;withmarking[true]/checkbox;markingcolor[#eaebe5]/color;"
         data-vis-attrs1="borderWidth[1];bordercolor[#000000]/color;nobgcolor[true]/checkbox;bgcolor[#FFFFFF]/color;withlegend[false]/checkbox;legendposition[ne]/select,ne,nw,se,sw;"
