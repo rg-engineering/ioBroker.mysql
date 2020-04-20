@@ -10,7 +10,7 @@
 
 [![NPM](https://nodei.co/npm/iobroker.mysql.png?downloads=true)](https://nodei.co/npm/iobroker.mysql/)
 
-**Tests:**: [![Travis-CI](http://img.shields.io/travis/rg-engineering/ioBroker.mysql/master.svg)](https://travis-ci.org/rg-engineering/ioBroker.mysql) [![Greenkeeper badge](https://badges.greenkeeper.io/rg-engineering/ioBroker.mysql.svg)](https://greenkeeper.io/)
+**Tests:**: [![Travis-CI](http://img.shields.io/travis/rg-engineering/ioBroker.mysql/master.svg)](https://travis-ci.org/rg-engineering/ioBroker.mysql) 
 
 ## mysql adapter for ioBroker
 
