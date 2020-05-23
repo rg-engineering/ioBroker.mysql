@@ -8,7 +8,6 @@
 // you need to create an adapter
 const utils = require("@iobroker/adapter-core");
 
-// Load your modules here, e.g.:
 const mysql = require("mysql2/promise");
 
 //---------- mySQL
@@ -66,22 +65,22 @@ function startAdapter(options) {
         message: async (obj) => {
             if (obj) {
                 switch (obj.command) {
-                case "getTables":
-                    adapter.log.debug("got get tables");
-                    await ListTables(obj);
-                    break;
-                case "importData":
-                    adapter.log.debug("got importData");
-                    await ImportData(obj);
-                    break;
-                case "createTable":
-                    adapter.log.debug("got createTable");
-                    await CreateTable(obj);
-                    //to do
-                    break;
-                default:
-                    adapter.log.error("unknown message " + obj.command);
-                    break;
+                    case "getTables":
+                        adapter.log.debug("got get tables");
+                        await ListTables(obj);
+                        break;
+                    case "importData":
+                        adapter.log.debug("got importData");
+                        await ImportData(obj);
+                        break;
+                    case "createTable":
+                        adapter.log.debug("got createTable");
+                        await CreateTable(obj);
+                        //to do
+                        break;
+                    default:
+                        adapter.log.error("unknown message " + obj.command);
+                        break;
                 }
             }
         }
@@ -97,12 +96,12 @@ function startAdapter(options) {
 //
 async function main() {
     try {
-        
+
+        await Connect(); //we need a connected database for createDatapoints
+
         await CreateDatepoints();
 
         await SubscribeStates();
-
-        await Connect();
        
     }
     catch (e) {
@@ -193,11 +192,15 @@ async function ImportData(obj) {
         };
 
         switch (obj.message.separator) {
-        case "1": data.separator = ","; break;
-        case "2": data.separator = ";"; break;
-        default:
-            adapter.log.error("no separator defined " + obj.message.separator);
-            break;
+            case "1":
+                data.separator = ",";
+                break;
+            case "2":
+                data.separator = ";";
+                break;
+            default:
+                adapter.log.error("no separator defined " + obj.message.separator);
+                break;
         }
 
         //to do: filetype prüfen, ob wirklich csv
@@ -303,65 +306,22 @@ async function ImportData(obj) {
                 const CurrentImportValue = parseFloat( RemoveChars(rowCells[1]));
                 const CurrentImportDiff = parseFloat ( RemoveChars(rowCells[3]));
 
-                if (typeof LastImportDate !== "undefined") {
+               
 
-                    adapter.log.debug(rowCells[0] + " last " + LastImportDate.toDateString() + " current " + CurrentImportDate.toDateString());
+                const current = {
+                    value: CurrentImportValue,
+                    diff: CurrentImportDiff,
+                    date: CurrentImportDate
+                };
 
-                    const diffTime = Math.abs(CurrentImportDate.getTime() - LastImportDate.getTime());
-                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    diffDays--;
+                const last = {
+                    value: LastImportValue,
+                    date: LastImportDate
+                };
 
-                    const ValuePerDay = CurrentImportDiff / diffDays;
-                    let NewValue = LastImportValue;
-                    const NewDate = LastImportDate;
+                await FillUpData(current, last, rowCells, prequerystring, data.datatypes);
 
-                    adapter.log.debug("day diff " + diffDays + " value per day " + ValuePerDay + " " + CurrentImportDiff);
-
-                    for (let d = 0; d < diffDays; d++) {
-                        NewValue += ValuePerDay;
-
-                        //const nTime = NewDate.getTime();
-                        //NewDate = new Date(nTime + (1000 * 60 * 60 * 24));
-                        NewDate.setDate(NewDate.getDate() + 1);
-                      
-                        adapter.log.debug("interpolation day " + NewDate.toDateString() + " value " + NewValue );
-
-                        querystring = prequerystring;
-
-
-                        //INSERT INTO Strom(Datum, Zaehlerstand, Verbrauch, Versorgerablese, Notiz, Kennzeichnung)  VALUES('2008-12-16', 648.8, 0, 'Nein', '', '')
-
-                        //############################
-                        //prepare row
-
-                        rowCells[0] = NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate();
-                        rowCells[1] = NewValue;
-                        rowCells[3] = ValuePerDay;
-                        await WriteRow(querystring, rowCells, data.datatypes);                      
-                    }
-
-                    if (Math.abs(NewValue - CurrentImportValue) > 1) {
-                        adapter.log.warn("calculation diff " + NewValue + " / " + CurrentImportValue);
-                    }
-                }
-                else {
-                    // direkt eintragen ohne interpol, da erster wert
-                    adapter.log.debug("direct, data " + rowCells[0] + " " + rowCells[1] + " " + rowCells[3] + " " + CurrentImportDate.toDateString());
-                    querystring = prequerystring;
-
-                    //############################
-                    // prepare row
-
-                    rowCells[0] = CurrentImportDate.getFullYear() + "-" + (CurrentImportDate.getMonth() + 1) + "-" + CurrentImportDate.getDate();
-                    rowCells[1] = CurrentImportValue;
-                    rowCells[3] = CurrentImportDiff;
-
-                    adapter.log.debug("***** " + rowCells[0] + " " + CurrentImportDate.toDateString());
-
-
-                    await WriteRow(querystring, rowCells, data.datatypes);
-
-                }
+                
                 LastImportDate = CurrentImportDate;
                 LastImportValue = CurrentImportValue;
 
@@ -424,10 +384,92 @@ async function WriteRow(querystring, row, datatypes) {
 
     adapter.log.debug("query " + querystring);
 
-    const [rows, fields] = await mysql_connection.execute(querystring);
+    await mysql_connection.execute(querystring);
 
 }
 
+async function FillUpData(current, last, rowCells, preparedQuery, datatypes) {
+    /*
+    const current = {
+        value: CurrentImportValue,
+        diff: CurrentImportDiff,
+        date: CurrentImportDate
+    };
+
+    const last = {
+        value: LastImportValue,
+        date: LastImportDate
+    };
+    */
+
+    let querystring = "";
+
+    if (typeof last.value !== undefined) {
+
+        adapter.log.debug(rowCells[0] + " last " +last.date.toDateString() + " current " + current.date.toDateString());
+
+        const diffTime = Math.abs(current.date.getTime() - last.date.getTime());
+        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        diffDays--;
+
+        const ValuePerDay = current.diff / diffDays;
+        let NewValue = last.value;
+        const NewDate = last.date;
+
+        adapter.log.debug("day diff " + diffDays + " value per day " + ValuePerDay + " " + current.diff);
+
+        for (let d = 0; d < diffDays; d++) {
+            NewValue += ValuePerDay;
+
+            //const nTime = NewDate.getTime();
+            //NewDate = new Date(nTime + (1000 * 60 * 60 * 24));
+            NewDate.setDate(NewDate.getDate() + 1);
+
+            adapter.log.debug("interpolation day " + NewDate.toDateString() + " value " + NewValue);
+
+            querystring = preparedQuery;
+
+
+            //INSERT INTO Strom(Datum, Zaehlerstand, Verbrauch, Versorgerablese, Notiz, Kennzeichnung)  VALUES('2008-12-16', 648.8, 0, 'Nein', '', '')
+
+            //############################
+            //prepare row
+
+            rowCells[0] = NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate();
+            rowCells[1] = NewValue;
+            rowCells[3] = ValuePerDay;
+
+
+
+            await WriteRow(querystring, rowCells, datatypes);
+
+            adapter.log.debug("**##*** " + rowCells[0] + " " + current.date.toDateString() + " " + rowCells[1] + " " + rowCells[3]);
+        }
+
+        if (Math.abs(NewValue - current.value) > 1) {
+            adapter.log.warn("calculation diff " + NewValue + " / " + current.value);
+        }
+    }
+    else {
+        // direkt eintragen ohne interpol, da erster wert
+        adapter.log.debug("direct, data " + rowCells[0] + " " + rowCells[1] + " " + rowCells[3] + " " + current.date.toDateString());
+        querystring = preparedQuery;
+
+        //############################
+        // prepare row
+
+        rowCells[0] = current.date.getFullYear() + "-" + (current.date.getMonth() + 1) + "-" + current.date.getDate();
+        rowCells[1] = current.value;
+        rowCells[3] = current.diff;
+
+        adapter.log.debug("***** " + rowCells[0] + " " + current.date.toDateString() + " " + rowCells[1] + " " + rowCells[3]);
+
+
+        await WriteRow(querystring, rowCells, datatypes);
+
+    }
+
+}
 
 function RemoveChars(input) {
 
@@ -438,9 +480,9 @@ function RemoveChars(input) {
     if (typeof input === "string") {
 
         // to do: make it adjustable...
-        output = input.replace('.', '');
+        output = input.replace(".", "");
 
-        output = output.replace(',', '.');
+        output = output.replace(",", ".");
     }
     
     return output;
@@ -462,7 +504,7 @@ async function ListTables(obj) {
 
         if (rows.length > 0) {
 
-            for (let i in rows) {
+            for (const i in rows) {
                 adapter.log.debug("row: " + JSON.stringify(rows[i][fields[0].name]));
 
                 tables.push(rows[i][fields[0].name]);
@@ -637,7 +679,7 @@ async function CreateDatepoints() {
         });
 
 
-        if (adapter.config.queries != null && typeof adapter.config.queries != "undefined" && adapter.config.queries.length > 0) {
+        if (adapter.config.queries != null && typeof adapter.config.queries != undefined && adapter.config.queries.length > 0) {
 
             await adapter.setObjectNotExistsAsync("ExecuteQueries", {
                 type: "state",
@@ -688,6 +730,93 @@ async function CreateDatepoints() {
 
         }
 
+        if (adapter.config.InsertNewValuesFromVis) {
+            await adapter.setObjectNotExistsAsync("vis.Date", {
+                type: "state",
+                common: {
+                    name: "Input Date",
+                    type: "string",
+                    role: "value",
+                    unit: "",
+                    read: true,
+                    write: true
+                },
+                native: { id: "vis.Date"}
+            });
+
+            await adapter.setObjectNotExistsAsync("vis.Update", {
+                type: "state",
+                common: {
+                    name: "Button Update",
+                    type: "boolean",
+                    role: "button",
+                    unit: "",
+                    read: false,
+                    write: true
+                },
+                native: { id: "vis.Update" }
+            });
+
+            await adapter.setObjectNotExistsAsync("vis.Opened", {
+                type: "state",
+                common: {
+                    name: "Button Opened",
+                    type: "boolean",
+                    role: "button",
+                    unit: "",
+                    read: false,
+                    write: true
+                },
+                native: { id: "vis.Opened" }
+            });
+            
+            const querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
+
+            adapter.log.debug("query: " + querystring);
+
+            const [rows, fields] = await mysql_connection.query(querystring);
+
+            adapter.log.debug("got result: " + JSON.stringify(rows));
+
+            if (rows.length > 0) {
+
+                for (const i in rows) {
+
+                    await adapter.setObjectNotExistsAsync("vis.NewValue_" + rows[i][fields[0].name], {
+                        type: "state",
+                        common: {
+                            name: "Input Value for table " + rows[i][fields[0].name],
+                            type: "string",
+                            role: "value",
+                            unit: "",
+                            read: true,
+                            write: true
+                        },
+                        native: { id: "vis.NewValue_" + rows[i][fields[0].name] }
+                    });
+
+                    await adapter.setObjectNotExistsAsync("vis.LastUpdate_" + rows[i][fields[0].name], {
+                        type: "state",
+                        common: {
+                            name: "Last update of table " + rows[i][fields[0].name],
+                            type: "string",
+                            role: "value",
+                            unit: "",
+                            read: true,
+                            write: true
+                        },
+                        native: { id: "vis.LastUpdate_" + rows[i][fields[0].name] }
+                    });
+
+                    
+                }
+            }
+
+
+
+
+        }
+
     }
     catch (e) {
         adapter.log.error("exception in CreateDatapoints [" + e + "]");
@@ -708,7 +837,7 @@ function SubscribeStates(callback) {
 
         adapter.subscribeStates("Query");
 
-        if (adapter.config.queries != null && typeof adapter.config.queries != "undefined" && adapter.config.queries.length > 0) {
+        if (adapter.config.queries != null && typeof adapter.config.queries != undefined && adapter.config.queries.length > 0) {
             adapter.subscribeStates("ExecuteQueries");
 
             for (let i = 0; i < adapter.config.queries.length; i++) {
@@ -719,13 +848,48 @@ function SubscribeStates(callback) {
             }
 
         }
-        
+
+        if (adapter.config.InsertNewValuesFromVis) {
+            adapter.subscribeStates("vis.Update");
+            adapter.subscribeStates("vis.Opened");
+        }
+
+
         adapter.log.debug("#subscribtion finished");
     }
     catch (e) {
         adapter.log.error("exception in SubscribeStates [" + e + "]");
     }
     if (callback) callback();
+}
+
+
+function TimeConverter(UNIX_timestamp) {
+
+    let a;
+
+    if (typeof UNIX_timestamp !== undefined && UNIX_timestamp > 0) {
+        a = new Date(UNIX_timestamp * 1000);
+    }
+    else {
+        a = new Date();
+    }
+
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    /*
+    if (this.language === "de") {
+        months = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+    }
+    */
+    const year = a.getFullYear();
+    const month = months[a.getMonth()];
+    const date = ("0" + a.getDate()).slice(-2);
+    const hour = ("0" + a.getHours()).slice(-2);
+    const min = ("0" + a.getMinutes()).slice(-2);
+    const sec = ("0" + a.getSeconds()).slice(-2);
+    const time = date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
+    return time;
 }
 
 //*******************************************************************
@@ -739,21 +903,258 @@ async function HandleStateChange(id, state) {
 
         if (state && state.ack !== true) {
             //first set ack flag
-            await adapter.setStateAsync(id, { ack: true });
+            await adapter.setStateAsync(id, { val: state.val, ack: true });
 
             if (id.includes("ExecuteQueries")) {
                 await HandleQueries();
             }
-
-            //execute only if ack not set yet
             else if (id.includes("Query")) {
                 await HandleQuery(state);
+            }
+            else if (id.includes("vis.Update")) {
+                await VisUpdate();
+            }
+            else if (id.includes("vis.Opened")) {
+                await VisOpened();
             }
         }
     }
     catch (e) {
         adapter.log.error("exception in HandleStateChange [" + e + "]");
     }
+}
+
+async function VisOpened() {
+    await adapter.setStateAsync("vis.Date", TimeConverter());
+
+    try {
+        let querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
+
+        adapter.log.debug("query: " + querystring);
+
+        const [rows, fields] = await mysql_connection.query(querystring);
+
+        adapter.log.debug("got result: " + JSON.stringify(rows));
+
+        if (rows.length > 0) {
+
+            for (const i in rows) {
+
+                const tablename = rows[i][fields[0].name];
+
+                querystring = "select * from " + tablename + " order by Datum DESC limit 1";
+                adapter.log.debug("query: " + querystring);
+
+                const [rows1, fields1] = await mysql_connection.query(querystring);
+
+                adapter.log.debug("got result: " + JSON.stringify(rows1));
+                if (rows1.length > 0) {
+
+                    const lastValue = rows1[0].Zaehlerstand;
+                    const lastDate = new Date(rows1[0].Datum);
+
+
+                    
+                    adapter.log.debug("got last value for " + tablename + " : " + lastValue + " from " + lastDate + " " );
+
+                    await adapter.setStateAsync("vis.NewValue_" + tablename, lastValue);
+
+                    await adapter.setStateAsync("vis.LastUpdate_" + tablename, lastDate.toDateString());
+
+                }
+            }
+        }
+
+    }
+    catch (e) {
+        adapter.log.error("exception in VisOpened [" + e + "]");
+    }
+
+}
+
+
+async function VisUpdate() {
+
+    const oimportDate = await adapter.getStateAsync("vis.Date");
+    const importDate = new Date(oimportDate.val);
+
+    //get all tables
+    const querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
+
+    adapter.log.debug("query: " + querystring);
+
+    const [rows, fields] = await mysql_connection.query(querystring);
+
+    adapter.log.debug("got result: " + JSON.stringify(rows));
+
+    if (rows.length > 0) {
+
+        for (const i in rows) {
+
+            //get last data row in database
+            let LastImportValue;
+            let LastImportDate;
+            const tablename = rows[i][fields[0].name];
+
+            const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
+            adapter.log.debug("query: " + querystring);
+
+            const [rows1, fields1] = await mysql_connection.query(querystring);
+
+            adapter.log.debug("got result: " + JSON.stringify(rows1));
+            if (rows1.length > 0) {
+
+                LastImportValue = rows1[0].Zaehlerstand;
+                LastImportDate = new Date(rows1[0].Datum);
+                adapter.log.debug("got last value for " + tablename + " : " + LastImportValue + " from " + LastImportDate.toDateString());
+            }
+
+            const importValue = await adapter.getStateAsync("vis.NewValue_" + tablename);
+
+            const importDiff = importValue.val - LastImportValue;
+
+            adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue.val + " " + importDiff);
+
+            const current = {
+                value: importValue.val,
+                diff: importDiff,
+                date: importDate
+            };
+
+            const last = {
+                value: LastImportValue,
+                date: LastImportDate
+            };
+
+            const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand,Verbrauch)  VALUES (";
+            const rowCells = [0, 0, 0, 0];
+            const datatypes = ["date", "float", "none", "float"];
+
+            await FillUpData(current, last, rowCells, prequerystring, datatypes);
+
+        }
+    }
+
+
+}
+
+/*
+ * mysql.0	2020-05-23 16:43:01.054	error	(7685) exception in HandleStateChange [TypeError: current.date.toDateString is not a function]
+mysql.0	2020-05-23 16:43:01.047	debug	(7685) got last value for Heizung : 29843 from Thu Dec 26 2019 00:00:00 GMT+0100 (Central European Standard Time)
+mysql.0	2020-05-23 16:43:01.045	debug	(7685) got result: [{"ID":4019,"Datum":"2019-12-25T23:00:00.000Z","Zaehlerstand":29843,"Verbrauch":47.2727}]
+mysql.0	2020-05-23 16:43:01.036	debug	(7685) query: select * from Heizung order by Datum DESC limit 1
+mysql.0	2020-05-23 16:43:01.034	debug	(7685) got result: [{"Tables_in_Verbrauch":"Heizung"},{"Tables_in_Verbrauch":"PVStrom"},{"Tables_in_Verbrauch":"Strom"},{"Tables_in_Verbrauch":"WPStrom"},{"Tables_in_Verbrauch":"Wasser"}]
+mysql.0	2020-05-23 16:43:01.029	debug	(7685) query: SHOW TABLES in Verbrauch
+ * 
+ * /
+
+/**
+ * 
+ * 
+ * @param {string} timeVal
+ * @param {string} timeLimit
+ */
+function IsLater(timeVal, timeLimit) {
+
+    let ret = false;
+    try {
+        adapter.log.debug("check IsLater : " + timeVal + " " + timeLimit);
+
+        if (typeof timeVal === "string" && typeof timeLimit === "string") {
+            const valIn = timeVal.split(":");
+            const valLimits = timeLimit.split(":");
+
+            if (valIn.length > 1 && valLimits.length > 1) {
+
+                if (parseInt(valIn[0]) > parseInt(valLimits[0])
+                    || (parseInt(valIn[0]) == parseInt(valLimits[0]) && parseInt(valIn[1]) > parseInt(valLimits[1]))) {
+                    ret = true;
+                    adapter.log.debug("yes, IsLater : " + timeVal + " " + timeLimit);
+                }
+            }
+            else {
+                adapter.log.error("string does not contain : " + timeVal + " " + timeLimit);
+            }
+        }
+        else {
+            adapter.log.error("not a string " + typeof timeVal + " " + typeof timeLimit);
+        }
+    }
+    catch (e) {
+        adapter.log.error("exception in IsLater [" + e + "]");
+    }
+    return ret;
+}
+
+/**
+ * @param {string } timeVal
+ * @param {string } [timeLimit]
+ */
+function IsEarlier(timeVal, timeLimit) {
+
+    let ret = false;
+    try {
+        adapter.log.debug("check IsEarlier : " + timeVal + " " + timeLimit);
+
+        if (typeof timeVal === "string" && typeof timeLimit === "string") {
+            const valIn = timeVal.split(":");
+            const valLimits = timeLimit.split(":");
+
+            if (valIn.length > 1 && valLimits.length > 1) {
+
+                if (parseInt(valIn[0]) < parseInt(valLimits[0])
+                    || (parseInt(valIn[0]) == parseInt(valLimits[0]) && parseInt(valIn[1]) < parseInt(valLimits[1]))) {
+                    ret = true;
+                    adapter.log.debug("yes, IsEarlier : " + timeVal + " " + timeLimit);
+                }
+            }
+            else {
+                adapter.log.error("string does not contain : " + timeVal + " " + timeLimit);
+            }
+        }
+        else {
+            adapter.log.error("not a string " + typeof timeVal + " " + typeof timeLimit);
+        }
+    }
+    catch (e) {
+        adapter.log.error("exception in IsEarlier [" + e + "]");
+    }
+    return ret;
+}
+
+/**
+ * @param {string} timeVal
+ * @param {string} timeLimit
+ */
+function IsEqual(timeVal, timeLimit) {
+
+    let ret = false;
+    try {
+        adapter.log.debug("check IsEqual : " + timeVal + " " + timeLimit);
+
+        if (typeof timeVal === "string" && typeof timeLimit === "string") {
+            const valIn = timeVal.split(":");
+            const valLimits = timeLimit.split(":");
+
+            if (valIn.length > 1 && valLimits.length > 1) {
+
+                if (parseInt(valIn[0]) === parseInt(valLimits[0]) && parseInt(valIn[1]) === parseInt(valLimits[1])) {
+                    ret = true;
+                    adapter.log.debug("yes, IsEqual : " + timeVal + " " + timeLimit);
+                }
+            }
+            else {
+                adapter.log.error("string does not contain : " + timeVal + " " + timeLimit);
+            }
+        }
+        else {
+            adapter.log.error("not a string " + typeof timeVal + " " + typeof timeLimit);
+        }
+    }
+    catch (e) {
+        adapter.log.error("exception in IsEqual [" + e + "]");
+    }
+    return ret;
 }
 
 // If started as allInOne/compact mode => return function to create instance
