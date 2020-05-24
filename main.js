@@ -978,64 +978,89 @@ async function VisUpdate() {
     const oimportDate = await adapter.getStateAsync("vis.Date");
     const importDate = new Date(oimportDate.val);
 
-    //get all tables
-    const querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
+    try {
+        //get all tables
+        const querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
 
-    adapter.log.debug("query: " + querystring);
+        adapter.log.debug("query: " + querystring);
 
-    const [rows, fields] = await mysql_connection.query(querystring);
+        const [rows, fields] = await mysql_connection.query(querystring);
 
-    adapter.log.debug("got result: " + JSON.stringify(rows));
+        adapter.log.debug("got result: " + JSON.stringify(rows));
 
-    if (rows.length > 0) {
+        if (rows.length > 0) {
 
-        for (const i in rows) {
+            for (const i in rows) {
 
-            //get last data row in database
-            let LastImportValue;
-            let LastImportDate;
-            const tablename = rows[i][fields[0].name];
+                //get last data row in database
+                let LastImportValue;
+                let LastImportDate;
+                const tablename = rows[i][fields[0].name];
 
-            const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
-            adapter.log.debug("query: " + querystring);
+                const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
+                adapter.log.debug("query: " + querystring);
 
-            const [rows1, fields1] = await mysql_connection.query(querystring);
+                const [rows1, fields1] = await mysql_connection.query(querystring);
 
-            adapter.log.debug("got result: " + JSON.stringify(rows1));
-            if (rows1.length > 0) {
+                adapter.log.debug("got result: " + JSON.stringify(rows1));
+                if (rows1.length > 0) {
 
-                LastImportValue = rows1[0].Zaehlerstand;
-                LastImportDate = new Date(rows1[0].Datum);
-                adapter.log.debug("got last value for " + tablename + " : " + LastImportValue + " from " + LastImportDate.toDateString());
+                    LastImportValue = rows1[0].Zaehlerstand;
+                    LastImportDate = new Date(rows1[0].Datum);
+                    adapter.log.debug("got last value for " + tablename + " : " + LastImportValue + " from " + LastImportDate.toDateString());
+                }
+
+                const importValue = await adapter.getStateAsync("vis.NewValue_" + tablename);
+
+                const importDiff = importValue.val - LastImportValue;
+
+                adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue.val + " " + importDiff);
+
+                const current = {
+                    value: importValue.val,
+                    diff: importDiff,
+                    date: importDate
+                };
+
+                const last = {
+                    value: LastImportValue,
+                    date: LastImportDate
+                };
+
+                if (importValue.val >= LastImportValue) {
+
+                    if (importDate > LastImportDate) {
+                        const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand,Verbrauch)  VALUES (";
+                        const rowCells = [0, 0, 0, 0];
+                        const datatypes = ["date", "float", "none", "float"];
+
+                        await FillUpData(current, last, rowCells, prequerystring, datatypes);
+                    }
+                    else {
+                        adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
+                    }
+                }
+                else {
+                    adapter.log.error("new value smaller than old value" + importValue.val + " < " + LastImportValue);
+                }
+
+
             }
-
-            const importValue = await adapter.getStateAsync("vis.NewValue_" + tablename);
-
-            const importDiff = importValue.val - LastImportValue;
-
-            adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue.val + " " + importDiff);
-
-            const current = {
-                value: importValue.val,
-                diff: importDiff,
-                date: importDate
-            };
-
-            const last = {
-                value: LastImportValue,
-                date: LastImportDate
-            };
-
-            const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand,Verbrauch)  VALUES (";
-            const rowCells = [0, 0, 0, 0];
-            const datatypes = ["date", "float", "none", "float"];
-
-            await FillUpData(current, last, rowCells, prequerystring, datatypes);
-
         }
     }
+    catch (e) {
+        adapter.log.error("exception in VisUpdate [" + e + "]");
+    }
 
+    adapter.log.info("### import done");
 
+    await HandleQueries();
+
+    adapter.log.info("### query done");
+
+    await VisOpened();
+
+    adapter.log.info("### finished");
 }
 
 /*

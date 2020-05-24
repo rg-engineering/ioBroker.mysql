@@ -1266,7 +1266,7 @@
                     // update every x seconds
                     if (!vis.editMode) {
                         $div.data('timer', setInterval(function () {
-                            vis.binds.mysql.history.update($div);
+                            update();
                         }, parseInt(vis.binds.mysql.setup.intervals[data.time_interval] / (parseInt(data.points, 10) || 10), 10)));
                     }
                 }
