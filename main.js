@@ -12,6 +12,7 @@ const mysql = require("mysql2/promise");
 
 //---------- mySQL
 let mysql_connection;
+let bIsConnected = false;
 
 let adapter;
 function startAdapter(options) {
@@ -123,6 +124,14 @@ async function Connect() {
             port: adapter.config.SQL_Port,
             password: adapter.config.SQL_Password,
         });
+
+        bIsConnected = true;
+
+        mysql_connection.on("error", err => {
+            adapter.log.error("Error on connection: " + err.message);
+            // stop doing stuff with conn
+            Disconnect();
+        });
     }
     catch (e) {
         adapter.log.error("exception in  Connect [" + e + "]");
@@ -134,6 +143,7 @@ function Disconnect() {
     try {
         mysql_connection.end();
         adapter.log.info("mySQL Database disconnected");
+        bIsConnected = false;
     }
     catch (e) {
         adapter.log.error("exception in  Disconnect [" + e + "]");
@@ -153,6 +163,11 @@ async function CreateTable(obj) {
     */
 
     try {
+
+        if (!bIsConnected) {
+            Connect();
+        }
+
 
         adapter.log.debug("create table " + obj.message.table);
         //to do: spaces und andere Sonderzeichen herausfiltern
@@ -179,6 +194,10 @@ async function ImportData(obj) {
 
     //csv import
     try {
+
+        if (!bIsConnected) {
+            Connect();
+        }
 
         const data = {
             allRows: obj.message.allRows,
@@ -494,6 +513,10 @@ async function ListTables(obj) {
     const tables = [];
     try {
 
+        if (!bIsConnected) {
+            Connect();
+        }
+
         const querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
 
         adapter.log.debug("query: " + querystring);
@@ -520,6 +543,10 @@ async function ListTables(obj) {
 async function HandleQuery(state) {
 
     try {
+        if (!bIsConnected) {
+            Connect();
+        }
+
         const querystring = state.val;
 
         adapter.log.debug("query: " + querystring);
@@ -543,6 +570,11 @@ async function HandleQuery(state) {
 async function HandleQueries() {
 
     try {
+
+
+        if (!bIsConnected) {
+            Connect();
+        }
 
         for (let i = 0; i < adapter.config.queries.length; i++) {
 
@@ -928,6 +960,12 @@ async function VisOpened() {
     await adapter.setStateAsync("vis.Date", TimeConverter());
 
     try {
+
+
+        if (!bIsConnected) {
+            Connect();
+        }
+
         let querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
 
         adapter.log.debug("query: " + querystring);
@@ -979,6 +1017,11 @@ async function VisUpdate() {
     const importDate = new Date(oimportDate.val);
 
     try {
+
+        if (!bIsConnected) {
+            Connect();
+        }
+
         //get all tables
         const querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
 

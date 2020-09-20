@@ -1,0 +1,10 @@
+* bei jedem Tabelle-Erstellen werden immer alle Tabellen fr Import übernommen -> nur updaten..
+* bei File vorbereiten muss alter Inhalt gelöscht werden
+* bei Anlagen von tabelle -> feedback erfolg / fehler fehlt
+* bei import feedback erfolg / fehler fehlt -> evtl auch fortschritt
+* widget
+  * einheit einstellbar
+
+* Auswertung (sql Abfrage und Anzeige im vis)
+    * letze 12 Monate
+    * letze 30 Tage
