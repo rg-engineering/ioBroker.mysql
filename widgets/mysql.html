@@ -43,6 +43,9 @@
 
     var MarkingColor = "eaebe5";
 
+    var formaterUnit = "none";
+
+
     if (vis.editMode) {
         // Add words for basic widgets
         $.extend(true, systemDictionary, {
@@ -300,7 +303,7 @@
                 "pl": "lat",
                 "zh-cn": "年份"
             },
-            
+
             "valueselect": {
                 "en": "select",
                 "de": "wählen",
@@ -599,7 +602,7 @@
                 "pl": "min. rozmiar kleszcza",
                 "zh-cn": "分钟刻度大小"
             },
-             "labelwidth": {
+            "labelwidth": {
                 "en": "label width",
                 "de": "Labelbreite",
                 "ru": "ширина этикетки",
@@ -611,7 +614,7 @@
                 "pl": "szerokość etykiety",
                 "zh-cn": "标签宽度"
             },
-             
+
             "coloraxis": {
                 "en": "color of axis",
                 "de": "Farbe der Achse",
@@ -663,7 +666,7 @@
         });
     }
 
- 
+
 
 
     vis.binds.mysql = {
@@ -713,217 +716,266 @@
 
                 }
 
-                   function SetMarkingColor(color) {
-        MarkingColor = color;
-    }
+                function SetMarkingColor(color) {
+                    MarkingColor = color;
+                }
 
-    function xwhFormatter(val, axis) {
-        if (val > 1000000)
-            return (val / 1000000).toFixed(axis.tickDecimals) + " MWh";
-        else if (val > 1000)
-            return (val / 1000).toFixed(axis.tickDecimals) + " kWh";
-        else
-            return val.toFixed(axis.tickDecimals) + " Wh";
-    }
-
-    function legendformater(label, series) {
-
-        //wenn keine Daten, dann ausblenden ->  (return null)
-        if (series.data == null || typeof series.data == "undefined" || typeof series.data[0] == "undefined") {
-
-            console.log('legendformater no label because no data ');
-            return null;
-        }
-        else {
-            console.log('legendformater label ' + label);
-            return label;
-        }
-    }
+                function SetUnit(unit) {
+                    formaterUnit = unit;
+                }
 
 
+                function formater(val, axis) {
 
-    //===============================================================
-    //Attention: this is different to sbfspot and vis-weather!!! we have much longer time periods here
-    function GridMarkings(axes) {
+                    console.log('legendformater unit ' + formaterUnit );
 
-        var markings = [];
-        var minDate = new Date(axes.xaxis.min);
+                    if (formaterUnit=="sel_watthour") {
+                        return xwhFormatter(val, axis);
+                    }
+                    else if (formaterUnit == "sel_watt") {
+                        return xwFormatter(val, axis);
+                    }
+                    else if (formaterUnit == "sel_liter") {
+                        return xliterFormatter(val, axis);
+                    }
+                    else if (formaterUnit == "sel_m3") {
+                        return xm3Formatter(val, axis);
+                    }
+                    else  {
+                        return val.toFixed(axis.tickDecimals);
+                    }
+                }
 
-        const dayDiff = (axes.xaxis.max - axes.xaxis.min) / 1000 / 60 / 60 / 24;
-        console.log('GridMarkings: DayDiff ' + dayDiff + ' (' + axes.xaxis.max + ' ' + axes.xaxis.min + ')');
 
-        var i = minDate.getTime();
+                function xwhFormatter(val, axis) {
+                    if (val > 1000000)
+                        return (val / 1000000).toFixed(axis.tickDecimals) + " MWh";
+                    else if (val > 1000)
+                        return (val / 1000).toFixed(axis.tickDecimals) + " kWh";
+                    else
+                        return val.toFixed(axis.tickDecimals) + " Wh";
+                }
 
-        if (dayDiff > 400) { //in years
-            minDate.setHours(0);
-            minDate.setMinutes(0);
-            minDate.setDate(1);
-            minDate.setMonth(0);
-            var i = minDate.getTime();
-            var curDate;
-            do {
-                markings.push({ xaxis: { from: i, to: i + 12 * 30 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
+                function xwFormatter(val, axis) {
+                    if (val > 1000000)
+                        return (val / 1000000).toFixed(axis.tickDecimals) + " MW";
+                    else if (val > 1000)
+                        return (val / 1000).toFixed(axis.tickDecimals) + " kW";
+                    else
+                        return val.toFixed(axis.tickDecimals) + " W";
+                }
 
-                i += 2 * 12 * 31 * 24 * 60 * 60 * 1000; //plus two year
+                function xliterFormatter(val, axis) {
+                    if (val > 100)
+                        return (val / 100).toFixed(axis.tickDecimals) + " hl";
+                    else if (val < 1)
+                        return (val * 10).toFixed(axis.tickDecimals) + " dl";
+                    else
+                        return val.toFixed(axis.tickDecimals) + " l";
+                }
 
-                curDate = new Date(i);
-                minDate = curDate;
-                minDate.setHours(0);
-                minDate.setMinutes(0);
-                minDate.setDate(1);
-                minDate.setMonth(0);
+                function xm3Formatter(val, axis) {
+                    return val.toFixed(axis.tickDecimals) + " m³";
+                }
 
-                console.log('GridMarkings (1): ' + minDate.toLocaleString());
+                function legendformater(label, series) {
 
-                i = minDate.getTime();
+                    //wenn keine Daten, dann ausblenden ->  (return null)
+                    if (series.data == null || typeof series.data == "undefined" || typeof series.data[0] == "undefined") {
 
-            } while (i < axes.xaxis.max);
-        }
-
-        else if (dayDiff > 30) { // in months
-            minDate.setHours(0);
-            minDate.setMinutes(0);
-            minDate.setDate(1);
-            var i = minDate.getTime();
-            var curDate;
-            do {
-                markings.push({ xaxis: { from: i, to: i + 30 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
-
-                i += 2 * 31 * 24 * 60 * 60 * 1000; //plus one month
-
-                curDate = new Date(i);
-                minDate = curDate;
-                minDate.setHours(0);
-                minDate.setMinutes(0);
-                minDate.setDate(1);
-
-                console.log('GridMarkings  (2): ' + minDate.toLocaleString());
-
-                i = minDate.getTime();
-            } while (i < axes.xaxis.max);
-        }
-        else if (dayDiff > 10) {
-            //if (dayDiff > 2) {
-            minDate.setHours(12);
-            minDate.setMinutes(0);
-            var i = minDate.getTime();
-            do {
-                markings.push({ xaxis: { from: i, to: i + 5 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
-                i += 2 * 5 * 24 * 60 * 60 * 1000; //plus 5 days
-            } while (i < axes.xaxis.max);
-        }
-
-        //if we only few hours then we need markings per hour otherwise per day
-        else if (dayDiff > 2) {
-            do {
-                markings.push({ xaxis: { from: i, to: i + 24 * 60 * 60 * 1000 }, color: MarkingColor });
-                i += 2 * 24 * 60 * 60 * 1000;
-            } while (i < axes.xaxis.max);
-
-        }
-        else {
-            do {
-                markings.push({ xaxis: { from: i, to: i + 60 * 60 * 1000 }, color: MarkingColor });
-                i += 2 * 60 * 60 * 1000;
-            } while (i < axes.xaxis.max);
-        }
-        return markings;
-
-    }
+                        console.log('legendformater no label because no data ');
+                        return null;
+                    }
+                    else {
+                        console.log('legendformater label ' + label);
+                        return label;
+                    }
+                }
 
 
 
-    //===============================================================
-    //Attention: this is different to sbfspot and vis-weather!!! we have much longer time periods here
-    function CalcTicks4X(axis) {
+                //===============================================================
+                //Attention: this is different to sbfspot and vis-weather!!! we have much longer time periods here
+                function GridMarkings(axes) {
 
-        var ticks = [];
+                    var markings = [];
+                    var minDate = new Date(axes.xaxis.min);
 
-        var minDate = new Date(axis.min);
+                    const dayDiff = (axes.xaxis.max - axes.xaxis.min) / 1000 / 60 / 60 / 24;
+                    console.log('GridMarkings: DayDiff ' + dayDiff + ' (' + axes.xaxis.max + ' ' + axes.xaxis.min + ')');
 
-        const dayDiff = (axis.max - axis.min) / 1000 / 60 / 60 / 24;
+                    var i = minDate.getTime();
 
-        console.log('CalcTicks4X: DayDiff ' + dayDiff + ' (' + axis.max + ' ' + axis.min + ')');
-        
-        if (dayDiff > 400) { //in years
-            minDate.setHours(12);
-            minDate.setMinutes(0);
-            minDate.setDate(15);
-            minDate.setMonth(5);
-            var i = minDate.getTime();
-            var curDate;
-            do {
-                ticks.push([i]);
+                    if (dayDiff > 400) { //in years
+                        minDate.setHours(0);
+                        minDate.setMinutes(0);
+                        minDate.setDate(1);
+                        minDate.setMonth(0);
+                        var i = minDate.getTime();
+                        var curDate;
+                        do {
+                            markings.push({ xaxis: { from: i, to: i + 12 * 30 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
 
-                i += 12 * 30 * 24 * 60 * 60 * 1000; //plus one year
+                            i += 2 * 12 * 31 * 24 * 60 * 60 * 1000; //plus two year
 
-                curDate = new Date(i);
-                minDate = curDate;
-                minDate.setHours(12);
-                minDate.setMinutes(0);
-                minDate.setDate(15);
-                minDate.setMonth(5);
+                            curDate = new Date(i);
+                            minDate = curDate;
+                            minDate.setHours(0);
+                            minDate.setMinutes(0);
+                            minDate.setDate(1);
+                            minDate.setMonth(0);
 
-                console.log('CalcTicks4X (1): ' + minDate.toLocaleString()); 
+                            console.log('GridMarkings (1): ' + minDate.toLocaleString());
 
-                i = minDate.getTime();
+                            i = minDate.getTime();
 
-            } while (i < axis.max);
-        }
+                        } while (i < axes.xaxis.max);
+                    }
 
-        else if (dayDiff > 30) { // in months
-            minDate.setHours(12);
-            minDate.setMinutes(0);
-            minDate.setDate(15);
-            var i = minDate.getTime();
-            var curDate;
-            do {
-                ticks.push([i]);
-                i += 30 * 24 * 60 * 60 * 1000; //plus one month
+                    else if (dayDiff > 30) { // in months
+                        minDate.setHours(0);
+                        minDate.setMinutes(0);
+                        minDate.setDate(1);
+                        var i = minDate.getTime();
+                        var curDate;
+                        do {
+                            markings.push({ xaxis: { from: i, to: i + 30 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
 
-                curDate = new Date(i);
-                minDate = curDate;
-                minDate.setHours(12);
-                minDate.setMinutes(0);
-                minDate.setDate(15);
+                            i += 2 * 31 * 24 * 60 * 60 * 1000; //plus one month
 
-                console.log('CalcTicks4X  (2): ' + minDate.toLocaleString());
+                            curDate = new Date(i);
+                            minDate = curDate;
+                            minDate.setHours(0);
+                            minDate.setMinutes(0);
+                            minDate.setDate(1);
 
-                i = minDate.getTime();
-            } while (i < axis.max);
-        }
-        else if (dayDiff > 10) {
-            //if (dayDiff > 2) {
-            minDate.setHours(12);
-            minDate.setMinutes(0);
-            var i = minDate.getTime();
-            do {
-                ticks.push([i]);
-                i += 5 * 24 * 60 * 60 * 1000; //plus 5 days
-            } while (i < axis.max);
-        }
+                            console.log('GridMarkings  (2): ' + minDate.toLocaleString());
 
-        else if (dayDiff > 2) {
-        //if (dayDiff > 2) {
-            minDate.setHours(12);
-            minDate.setMinutes(0);
-            var i = minDate.getTime();
-            do {
-                ticks.push([i]);
-                i += 24 * 60 * 60 * 1000; //plus a day
-            } while (i < axis.max);
-        }
-        else {
-            minDate.setHours(0);
-            minDate.setMinutes(0);
-            var i = minDate.getTime();
-            do {
-                ticks.push([i]);
-                i += 6 * 60 * 60 * 1000; //plus 6 hours
-            } while (i < axis.max);
-        }
-        return ticks;
-    }
+                            i = minDate.getTime();
+                        } while (i < axes.xaxis.max);
+                    }
+                    else if (dayDiff > 10) {
+                        //if (dayDiff > 2) {
+                        minDate.setHours(12);
+                        minDate.setMinutes(0);
+                        var i = minDate.getTime();
+                        do {
+                            markings.push({ xaxis: { from: i, to: i + 5 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
+                            i += 2 * 5 * 24 * 60 * 60 * 1000; //plus 5 days
+                        } while (i < axes.xaxis.max);
+                    }
+
+                    //if we only few hours then we need markings per hour otherwise per day
+                    else if (dayDiff > 2) {
+                        do {
+                            markings.push({ xaxis: { from: i, to: i + 24 * 60 * 60 * 1000 }, color: MarkingColor });
+                            i += 2 * 24 * 60 * 60 * 1000;
+                        } while (i < axes.xaxis.max);
+
+                    }
+                    else {
+                        do {
+                            markings.push({ xaxis: { from: i, to: i + 60 * 60 * 1000 }, color: MarkingColor });
+                            i += 2 * 60 * 60 * 1000;
+                        } while (i < axes.xaxis.max);
+                    }
+                    return markings;
+
+                }
+
+
+
+                //===============================================================
+                //Attention: this is different to sbfspot and vis-weather!!! we have much longer time periods here
+                function CalcTicks4X(axis) {
+
+                    var ticks = [];
+
+                    var minDate = new Date(axis.min);
+
+                    const dayDiff = (axis.max - axis.min) / 1000 / 60 / 60 / 24;
+
+                    console.log('CalcTicks4X: DayDiff ' + dayDiff + ' (' + axis.max + ' ' + axis.min + ')');
+
+                    if (dayDiff > 400) { //in years
+                        minDate.setHours(12);
+                        minDate.setMinutes(0);
+                        minDate.setDate(15);
+                        minDate.setMonth(5);
+                        var i = minDate.getTime();
+                        var curDate;
+                        do {
+                            ticks.push([i]);
+
+                            i += 12 * 30 * 24 * 60 * 60 * 1000; //plus one year
+
+                            curDate = new Date(i);
+                            minDate = curDate;
+                            minDate.setHours(12);
+                            minDate.setMinutes(0);
+                            minDate.setDate(15);
+                            minDate.setMonth(5);
+
+                            console.log('CalcTicks4X (1): ' + minDate.toLocaleString());
+
+                            i = minDate.getTime();
+
+                        } while (i < axis.max);
+                    }
+
+                    else if (dayDiff > 30) { // in months
+                        minDate.setHours(12);
+                        minDate.setMinutes(0);
+                        minDate.setDate(15);
+                        var i = minDate.getTime();
+                        var curDate;
+                        do {
+                            ticks.push([i]);
+                            i += 30 * 24 * 60 * 60 * 1000; //plus one month
+
+                            curDate = new Date(i);
+                            minDate = curDate;
+                            minDate.setHours(12);
+                            minDate.setMinutes(0);
+                            minDate.setDate(15);
+
+                            console.log('CalcTicks4X  (2): ' + minDate.toLocaleString());
+
+                            i = minDate.getTime();
+                        } while (i < axis.max);
+                    }
+                    else if (dayDiff > 10) {
+                        //if (dayDiff > 2) {
+                        minDate.setHours(12);
+                        minDate.setMinutes(0);
+                        var i = minDate.getTime();
+                        do {
+                            ticks.push([i]);
+                            i += 5 * 24 * 60 * 60 * 1000; //plus 5 days
+                        } while (i < axis.max);
+                    }
+
+                    else if (dayDiff > 2) {
+                        //if (dayDiff > 2) {
+                        minDate.setHours(12);
+                        minDate.setMinutes(0);
+                        var i = minDate.getTime();
+                        do {
+                            ticks.push([i]);
+                            i += 24 * 60 * 60 * 1000; //plus a day
+                        } while (i < axis.max);
+                    }
+                    else {
+                        minDate.setHours(0);
+                        minDate.setMinutes(0);
+                        var i = minDate.getTime();
+                        do {
+                            ticks.push([i]);
+                            i += 6 * 60 * 60 * 1000; //plus 6 hours
+                        } while (i < axis.max);
+                    }
+                    return ticks;
+                }
 
 
 
@@ -945,6 +997,7 @@
 
 
                     SetMarkingColor(data.markingcolor);
+                    SetUnit(data.unit);
 
                     var dateMin = -1;
                     var dateMax = -1;
@@ -980,10 +1033,7 @@
                             if ($sel == 1) {
                                 var oVals = oData[i];
                                 var sDate = oVals["time"];
-                                var value = parseInt(oVals["value"], 10);
-
-
-
+                                var value = parseFloat(oVals["value"]);
 
                                 var DateArray = sDate.split(":");
                                 var minute = parseInt(DateArray[1], 10);
@@ -1212,7 +1262,7 @@
                                         color: data.colorticklabel,
 
                                     },
-                                    tickFormatter: xwhFormatter //to do andere formatter 
+                                    tickFormatter: formater 
                                 },
 
                                 ],
@@ -1295,10 +1345,10 @@
 
 
             //then copy new values into oid
-            if (  fields.indexOf("valueselect") > -1) {
+            if (fields.indexOf("valueselect") > -1) {
 
-                
-                
+
+
                 var sValueSet = "today";
 
 
@@ -1356,7 +1406,7 @@
        
         data-vis-attrs0="withxaxix[true]/checkbox;axislabelcolor[#ffffff]/color;tickscolor[#ffffff]/color;LabelFontSize[8];LabelFontFamily[Arial]/fontname;withmarking[true]/checkbox;markingcolor[#eaebe5]/color;"
         data-vis-attrs1="borderWidth[1];bordercolor[#000000]/color;nobgcolor[true]/checkbox;bgcolor[#FFFFFF]/color;withlegend[false]/checkbox;legendposition[ne]/select,ne,nw,se,sw;"
-        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];"
+        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_watthour,sel_m3,sel_liter;"
         data-vis-attrs3="group.oids;oid_value/id;">
 
     <div class="vis-widget <%== this.data.attr('class') %>" style="overflow: hidden;" id="<%= this.data.attr('wid') %>">

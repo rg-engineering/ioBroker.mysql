@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mysql",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "interface to mySQL database",
   "author": {
     "name": "René G.",
@@ -17,9 +17,9 @@
     "url": "https://github.com/rg-engineering/ioBroker.mysql"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.3.1",
-    "mysql2": "^2.1.0",
-    "@sentry/node": "^5.15.5"
+    "@iobroker/adapter-core": "2.4.0",
+    "mysql2": "2.2.5",
+    "@sentry/node": "5.24.2"
   },
   "devDependencies": {
     "@iobroker/testing": "^2.2.0",

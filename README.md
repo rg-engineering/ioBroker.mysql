@@ -29,8 +29,11 @@ interface to mySQL database
 
 ## Changelog
 
+### 0.0.3
+* (René) bug fix flot diagram
+
 ### 0.0.1
-* (rg-engineering) initial release
+* (René) initial release
 
 ## License
 MIT License
