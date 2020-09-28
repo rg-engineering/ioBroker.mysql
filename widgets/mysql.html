@@ -1061,7 +1061,7 @@
                             else if ($sel == 2) {
                                 var oVals = oData[i];
                                 var sDate = oVals["date"];
-                                var value = parseInt(oVals["value"]);
+                                var value = parseFloat(oVals["value"]);
 
                                 //2017-08-12
 
@@ -1090,7 +1090,7 @@
                             else if ($sel == 3) {
                                 var oVals = oData[i];
                                 var sDate = oVals["month"];
-                                var value = parseInt(oVals["value"], 10);
+                                var value = parseFloat(oVals["value"]);
 
                                 //2016-09
 
@@ -1124,7 +1124,7 @@
                             else if ($sel == 4) {
                                 var oVals = oData[i];
                                 var year = parseInt(oVals["year"], 10);
-                                var value = parseInt(oVals["value"], 10);
+                                var value = parseFloat(oVals["value"]);
 
                                 //2016
 
@@ -1338,18 +1338,18 @@
 
             var changed = [];
             //delete all oid's
-            vis.views[view].widgets[widgetID].data.oid_value = "";
-            vis.widgets[widgetID].data.oid_value = "";
+            //vis.views[view].widgets[widgetID].data.oid_value = "";
+            //vis.widgets[widgetID].data.oid_value = "";
 
             //sbfspot.0.2000562095.history.last30Days
 
 
-            //then copy new values into oid
+            //then set only default x axis formater
             if (fields.indexOf("valueselect") > -1) {
 
 
 
-                var sValueSet = "today";
+                //var sValueSet = "today";
 
 
 
@@ -1361,22 +1361,22 @@
                     case 1:
                         vis.views[view].widgets[widgetID].data.graphDateFormat = "%H:%M";
                         vis.widgets[widgetID].data.graphDateFormat = "%H:%M";
-                        sValueSet = "today";
+                        //sValueSet = "today";
                         break;
                     case 2:
                         vis.views[view].widgets[widgetID].data.graphDateFormat = "%d.%b";
                         vis.widgets[widgetID].data.graphDateFormat = "%d.%b";
-                        sValueSet = "last30Days";
+                        //sValueSet = "last30Days";
                         break;
                     case 3:
                         vis.views[view].widgets[widgetID].data.graphDateFormat = "%b %Y";
                         vis.widgets[widgetID].data.graphDateFormat = "%b %Y";
-                        sValueSet = "last12Months";
+                        //sValueSet = "last12Months";
                         break;
                     case 4:
                         vis.views[view].widgets[widgetID].data.graphDateFormat = "%Y";
                         vis.widgets[widgetID].data.graphDateFormat = "%Y";
-                        sValueSet = "years";
+                        //sValueSet = "years";
                         break;
                     default: break;
                 }
