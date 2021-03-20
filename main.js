@@ -103,6 +103,8 @@ async function main() {
         await CreateDatepoints();
 
         await SubscribeStates();
+
+        await adapter.setStateAsync("vis.Status", "ready");
        
     }
     catch (e) {
@@ -1099,10 +1101,12 @@ async function VisUpdate() {
                         await FillUpData(current, last, rowCells, prequerystring, datatypes);
                     }
                     else {
+                        await adapter.setStateAsync("vis.Status", "error, see log");
                         adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
                     }
                 }
                 else {
+                    await adapter.setStateAsync("vis.Status", "error, see log");
                     adapter.log.error("new value smaller than old value" + importValue.val + " < " + LastImportValue);
                 }
 
@@ -1111,6 +1115,7 @@ async function VisUpdate() {
         }
     }
     catch (e) {
+        await adapter.setStateAsync("vis.Status", "exception, see log");
         adapter.log.error("exception in VisUpdate [" + e + "]");
     }
 
