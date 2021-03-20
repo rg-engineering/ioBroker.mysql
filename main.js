@@ -689,7 +689,7 @@ async function CreateDatepoints() {
             common: {
                 name: "Query",
                 type: "string",
-                role: "query",
+                role: "value",
                 unit: "",
                 read: true,
                 write: true
@@ -702,13 +702,15 @@ async function CreateDatepoints() {
             common: {
                 name: "Result",
                 type: "string",
-                role: "query",
+                role: "value",
                 unit: "",
                 read: true,
                 write: false
             },
             native: { id: "Result" }
         });
+
+        
 
 
         if (adapter.config.queries != null && typeof adapter.config.queries != undefined && adapter.config.queries.length > 0) {
@@ -801,7 +803,20 @@ async function CreateDatepoints() {
                 },
                 native: { id: "vis.Opened" }
             });
-            
+
+            await adapter.setObjectNotExistsAsync("vis.Status", {
+                type: "state",
+                common: {
+                    name: "Status",
+                    type: "string",
+                    role: "value",
+                    unit: "",
+                    read: true,
+                    write: false
+                },
+                native: { id: "vis.Status" }
+            });
+
             const querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
 
             adapter.log.debug("query: " + querystring);
@@ -1016,6 +1031,8 @@ async function VisUpdate() {
     const oimportDate = await adapter.getStateAsync("vis.Date");
     const importDate = new Date(oimportDate.val);
 
+    await adapter.setStateAsync("vis.Status", "start update");
+
     try {
 
         if (!bIsConnected) {
@@ -1039,6 +1056,8 @@ async function VisUpdate() {
                 let LastImportValue;
                 let LastImportDate;
                 const tablename = rows[i][fields[0].name];
+
+                await adapter.setStateAsync("vis.Status", "updating " + tablename);
 
                 const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
                 adapter.log.debug("query: " + querystring);
@@ -1095,14 +1114,17 @@ async function VisUpdate() {
         adapter.log.error("exception in VisUpdate [" + e + "]");
     }
 
+    await adapter.setStateAsync("vis.Status", "updating done, get new values");
     adapter.log.info("### import done");
 
     await HandleQueries();
 
+    await adapter.setStateAsync("vis.Status", "query done, updating vis");
     adapter.log.info("### query done");
 
     await VisOpened();
 
+    await adapter.setStateAsync("vis.Status", "all done");
     adapter.log.info("### finished");
 }
 
@@ -1122,6 +1144,7 @@ mysql.0	2020-05-23 16:43:01.029	debug	(7685) query: SHOW TABLES in Verbrauch
  * @param {string} timeVal
  * @param {string} timeLimit
  */
+/*
 function IsLater(timeVal, timeLimit) {
 
     let ret = false;
@@ -1153,11 +1176,12 @@ function IsLater(timeVal, timeLimit) {
     }
     return ret;
 }
-
+*/
 /**
  * @param {string } timeVal
  * @param {string } [timeLimit]
  */
+/*
 function IsEarlier(timeVal, timeLimit) {
 
     let ret = false;
@@ -1189,11 +1213,12 @@ function IsEarlier(timeVal, timeLimit) {
     }
     return ret;
 }
-
+*/
 /**
  * @param {string} timeVal
  * @param {string} timeLimit
  */
+/*
 function IsEqual(timeVal, timeLimit) {
 
     let ret = false;
@@ -1224,7 +1249,7 @@ function IsEqual(timeVal, timeLimit) {
     }
     return ret;
 }
-
+*/
 // If started as allInOne/compact mode => return function to create instance
 if (module && module.parent) {
     module.exports = startAdapter;

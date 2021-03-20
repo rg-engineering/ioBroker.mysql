@@ -1,9 +1,9 @@
 {
 	"common": {
 		"name": "mysql",
-		"version": "0.0.3",
+		"version": "0.0.4",
 		"news": {
-			"0.0.1": {
+			"0.0.4": {
 				"en": "initial release",
 				"de": "Erstveröffentlichung",
 				"ru": "Начальная версия",
@@ -70,7 +70,9 @@
 			{
 				"js-controller": ">=2.0.0"
 			}
-		]
+		],
+		"connectionType": "local",
+		"dataSource": "push"
 	},
 	"native": {
 		"SQL_IP": "localhost",
