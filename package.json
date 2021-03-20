@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "@iobroker/adapter-core": "2.4.0",
-    "mysql2": "2.2.5",
-    "@sentry/node": "6.2.2"
+    "@sentry/node": "6.2.2",
+    "mysql2": "2.2.5"
   },
   "devDependencies": {
     "@iobroker/testing": "2.4.0",
