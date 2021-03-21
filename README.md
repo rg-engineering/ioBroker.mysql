@@ -29,6 +29,9 @@ interface to mySQL database
 
 ## Changelog
 
+### 0.0.4 (2021-03-21)
+* (René) dependencies updated
+
 ### 0.0.3
 * (René) bug fix flot diagram
 
