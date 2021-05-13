@@ -1,94 +1,94 @@
 {
-	"common": {
-		"name": "mysql",
-		"version": "0.0.4",
-		"news": {
-			"0.0.4": {
-				"en": "initial release",
-				"de": "Erstveröffentlichung",
-				"ru": "Начальная версия",
-				"pt": "lançamento inicial",
-				"nl": "Eerste uitgave",
-				"fr": "Première version",
-				"it": "Versione iniziale",
-				"es": "Versión inicial",
-				"pl": "Pierwsze wydanie",
-				"zh-cn": "首次出版"
-			}
-		},
-		"title": "mySQL",
-		"titleLang": {
-			"en": "mySQL",
-			"de": "mySQL",
-			"ru": "MYSQL",
-			"pt": "mySQL",
-			"nl": "mySQL",
-			"fr": "mySQL",
-			"it": "mySQL",
-			"es": "mySQL",
-			"pl": "mySQL",
-			"zh-cn": "MySQL的"
-		},
-		"desc": {
-			"en": "interface to mySQL database",
-			"de": "Schnittstelle zur mySQL-Datenbank",
-			"ru": "интерфейс к базе данных MySQL",
-			"pt": "interface com o banco de dados mySQL",
-			"nl": "interface naar mySQL-database",
-			"fr": "interface avec la base de données mySQL",
-			"it": "interfaccia al database mySQL",
-			"es": "interfaz a la base de datos mySQL",
-			"pl": "interfejs do bazy danych mySQL",
-			"zh-cn": "与mySQL数据库的接口"
-		},
-		"authors": [
-			"René G. <info@rg-engineering.eu>"
-		],
-		"keywords": [
-			"mysql",
-			"database"
-		],
-		"license": "MIT",
-		"platform": "Javascript/Node.js",
-		"main": "main.js",
-		"icon": "mysql.png",
-		"enabled": true,
-		"messagebox": true,
-		"extIcon": "https://raw.githubusercontent.com/rg-engineering/ioBroker.mysql/master/admin/mysql.png",
-		"readme": "https://github.com/rg-engineering/ioBroker.mysql/blob/master/README.md",
-		"loglevel": "info",
-		"mode": "daemon",
-		"type": "storage",
-		"compact": true,
-		"materialize": true,
-		"plugins": {
-			"sentry": {
-				"dsn": "https://f27d7fdc1a6e4f4ea5580a5f4fe9dfcf@o390433.ingest.sentry.io/5233514"
-			}
-		},
-		"dependencies": [
-			{
-				"js-controller": ">=2.0.0"
-			}
-		],
-		"connectionType": "local",
-		"dataSource": "push"
-	},
-	"native": {
-		"SQL_IP": "localhost",
-		"SQL_Port": 3306,
-		"SQL_User": "",
-		"SQL_Password": "",
-		"SQL_Databasename": "",
-		"import_type": 1,
-		"import_separator": 2,
-		"import_table": "",
-		"import_FirstLineIsHeadline": true,
-		"import_CreateColumns": true,
-		"import_FillUp": false,
-		"Queries": [],
-		"InsertNewValuesFromVis":  true
-	},
-	"objects": [],
-	"instanceObjects": []
+    "common": {
+        "name": "mysql",
+        "version": "0.0.4",
+        "news": {
+            "0.0.4": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次出版"
+            }
+        },
+        "title": "mySQL",
+        "titleLang": {
+            "en": "mySQL",
+            "de": "mySQL",
+            "ru": "MYSQL",
+            "pt": "mySQL",
+            "nl": "mySQL",
+            "fr": "mySQL",
+            "it": "mySQL",
+            "es": "mySQL",
+            "pl": "mySQL",
+            "zh-cn": "MySQL的"
+        },
+        "desc": {
+            "en": "interface to mySQL database",
+            "de": "Schnittstelle zur mySQL-Datenbank",
+            "ru": "интерфейс к базе данных MySQL",
+            "pt": "interface com o banco de dados mySQL",
+            "nl": "interface naar mySQL-database",
+            "fr": "interface avec la base de données mySQL",
+            "it": "interfaccia al database mySQL",
+            "es": "interfaz a la base de datos mySQL",
+            "pl": "interfejs do bazy danych mySQL",
+            "zh-cn": "与mySQL数据库的接口"
+        },
+        "authors": [
+            "René G. <info@rg-engineering.eu>"
+        ],
+        "keywords": [
+            "mysql",
+            "database"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "mysql.png",
+        "enabled": true,
+        "messagebox": true,
+        "extIcon": "https://raw.githubusercontent.com/rg-engineering/ioBroker.mysql/master/admin/mysql.png",
+        "readme": "https://github.com/rg-engineering/ioBroker.mysql/blob/master/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "storage",
+        "compact": true,
+        "materialize": true,
+        "plugins": {
+            "sentry": {
+                "dsn": "https://f27d7fdc1a6e4f4ea5580a5f4fe9dfcf@o390433.ingest.sentry.io/5233514"
+            }
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=2.0.0"
+            }
+        ],
+        "connectionType": "local",
+        "dataSource": "push"
+    },
+    "native": {
+        "SQL_IP": "localhost",
+        "SQL_Port": 3306,
+        "SQL_User": "",
+        "SQL_Password": "",
+        "SQL_Databasename": "",
+        "import_type": 1,
+        "import_separator": 2,
+        "import_table": "",
+        "import_FirstLineIsHeadline": true,
+        "import_CreateColumns": true,
+        "import_FillUp": false,
+        "Queries": [],
+        "InsertNewValuesFromVis": true
+    },
+    "objects": [],
+    "instanceObjects": []
 }

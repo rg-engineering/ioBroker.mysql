@@ -1,16 +1,17 @@
 ![Logo](admin/mysql.png)
 # ioBroker.mysql
 
-[![NPM version](http://img.shields.io/npm/v/iobroker.mysql.svg)](https://www.npmjs.com/package/iobroker.mysql)
+
+![Number of Installations](http://iobroker.live/badges/mysql-installed.svg) ![Number of Installations](http://iobroker.live/badges/mysql-stable.svg)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.mysql.svg)](https://www.npmjs.com/package/iobroker.mysql)
-![Number of Installations (latest)](http://iobroker.live/badges/mysql-installed.svg)
-![Number of Installations (stable)](http://iobroker.live/badges/mysql-stable.svg)
-[![Dependency Status](https://img.shields.io/david/rg-engineering/iobroker.mysql.svg)](https://david-dm.org/rg-engineering/iobroker.mysql)
+[![NPM version](http://img.shields.io/npm/v/iobroker.mysql.svg)](https://www.npmjs.com/package/iobroker.mysql)
+
 [![Known Vulnerabilities](https://snyk.io/test/github/rg-engineering/ioBroker.mysql/badge.svg)](https://snyk.io/test/github/rg-engineering/ioBroker.mysql)
+![GitHub Actions](https://github.com/rg-engineering/ioBroker.mysql/workflows/Test%20and%20Release/badge.svg)
 
 [![NPM](https://nodei.co/npm/iobroker.mysql.png?downloads=true)](https://nodei.co/npm/iobroker.mysql/)
 
-**Tests:**: [![Travis-CI](http://img.shields.io/travis/rg-engineering/ioBroker.mysql/master.svg)](https://travis-ci.org/rg-engineering/ioBroker.mysql) 
+
 
 **This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** 
 For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
