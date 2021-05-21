@@ -17,7 +17,7 @@
     "url": "https://github.com/rg-engineering/ioBroker.mysql"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "2.4.0",
+    "@iobroker/adapter-core": "2.5.0",
     "@sentry/node": "6.2.2",
     "mysql2": "2.2.5"
   },
