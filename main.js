@@ -104,7 +104,7 @@ async function main() {
 
         await SubscribeStates();
 
-        await adapter.setStateAsync("vis.Status", "ready");
+        await adapter.setStateAsync("vis.Status", { val: "ready", ack: true });
        
     }
     catch (e) {
@@ -131,8 +131,15 @@ async function Connect() {
 
         mysql_connection.on("error", err => {
             adapter.log.error("Error on connection: " + err.message);
-            // stop doing stuff with conn
-            Disconnect();
+
+            if (err.message == "Can't add new command when connection is in closed state") {
+                adapter.log.error("already disconnected");
+                bIsConnected = false;
+            }
+            else {
+                // stop doing stuff with conn
+                Disconnect();
+            }
         });
     }
     catch (e) {
@@ -1033,7 +1040,7 @@ async function VisUpdate() {
     const oimportDate = await adapter.getStateAsync("vis.Date");
     const importDate = new Date(oimportDate.val);
 
-    await adapter.setStateAsync("vis.Status", "start update");
+    await adapter.setStateAsync("vis.Status", { val: "start update", ack: true });
 
     try {
 
@@ -1059,7 +1066,7 @@ async function VisUpdate() {
                 let LastImportDate;
                 const tablename = rows[i][fields[0].name];
 
-                await adapter.setStateAsync("vis.Status", "updating " + tablename);
+                await adapter.setStateAsync("vis.Status", { val: "updating " + tablename, ack: true });
 
                 const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
                 adapter.log.debug("query: " + querystring);
@@ -1101,12 +1108,12 @@ async function VisUpdate() {
                         await FillUpData(current, last, rowCells, prequerystring, datatypes);
                     }
                     else {
-                        await adapter.setStateAsync("vis.Status", "error, see log");
+                        await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
                         adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
                     }
                 }
                 else {
-                    await adapter.setStateAsync("vis.Status", "error, see log");
+                    await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
                     adapter.log.error("new value smaller than old value" + importValue.val + " < " + LastImportValue);
                 }
 
@@ -1115,21 +1122,21 @@ async function VisUpdate() {
         }
     }
     catch (e) {
-        await adapter.setStateAsync("vis.Status", "exception, see log");
+        await adapter.setStateAsync("vis.Status", { val: "exception, see log", ack: true });
         adapter.log.error("exception in VisUpdate [" + e + "]");
     }
 
-    await adapter.setStateAsync("vis.Status", "updating done, get new values");
+    await adapter.setStateAsync("vis.Status", { val: "updating done, get new values", ack: true });
     adapter.log.info("### import done");
 
     await HandleQueries();
 
-    await adapter.setStateAsync("vis.Status", "query done, updating vis");
+    await adapter.setStateAsync("vis.Status", { val: "query done, updating vis", ack: true });
     adapter.log.info("### query done");
 
     await VisOpened();
 
-    await adapter.setStateAsync("vis.Status", "all done");
+    await adapter.setStateAsync("vis.Status", { val: "all done", ack: true });
     adapter.log.info("### finished");
 }
 

@@ -30,14 +30,17 @@ interface to mySQL database
 
 ## Changelog
 
+### 0.0.5 (2021-07-09)
+* (RenÃ©) bug fix data types
+
 ### 0.0.4 (2021-03-21)
-* (René) dependencies updated
+* (RenÃ©) dependencies updated
 
 ### 0.0.3
-* (René) bug fix flot diagram
+* (RenÃ©) bug fix flot diagram
 
 ### 0.0.1
-* (René) initial release
+* (RenÃ©) initial release
 
 ## License
 MIT License
