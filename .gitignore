@@ -10,3 +10,4 @@ lib/i18n/*/flat.txt
 /*.njsproj
 /.project
 /.settings/
+*.orig

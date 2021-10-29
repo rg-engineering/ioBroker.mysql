@@ -30,6 +30,11 @@ interface to mySQL database
 
 ## Changelog
 
+### 0.0.6 (in progress)
+* (René) avoid endless loop
+* (René) update flot to 4.2.2
+* (René) limit grid markings
+
 ### 0.0.5 (2021-07-09)
 * (René) bug fix data types
 

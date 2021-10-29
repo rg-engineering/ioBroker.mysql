@@ -1141,14 +1141,35 @@ async function VisUpdate() {
 }
 
 /*
- * mysql.0	2020-05-23 16:43:01.054	error	(7685) exception in HandleStateChange [TypeError: current.date.toDateString is not a function]
-mysql.0	2020-05-23 16:43:01.047	debug	(7685) got last value for Heizung : 29843 from Thu Dec 26 2019 00:00:00 GMT+0100 (Central European Standard Time)
-mysql.0	2020-05-23 16:43:01.045	debug	(7685) got result: [{"ID":4019,"Datum":"2019-12-25T23:00:00.000Z","Zaehlerstand":29843,"Verbrauch":47.2727}]
-mysql.0	2020-05-23 16:43:01.036	debug	(7685) query: select * from Heizung order by Datum DESC limit 1
-mysql.0	2020-05-23 16:43:01.034	debug	(7685) got result: [{"Tables_in_Verbrauch":"Heizung"},{"Tables_in_Verbrauch":"PVStrom"},{"Tables_in_Verbrauch":"Strom"},{"Tables_in_Verbrauch":"WPStrom"},{"Tables_in_Verbrauch":"Wasser"}]
-mysql.0	2020-05-23 16:43:01.029	debug	(7685) query: SHOW TABLES in Verbrauch
- * 
- * /
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Strom group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Wasser group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromWP group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromPV group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Heizung group by DATE_FORMAT(DATUM, "%Y")
+
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Strom group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Wasser group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromWP group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromPV group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Heizung group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from Strom order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from Wasser order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from StromWP order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from StromPV order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from Heizung order by date DESC LIMIT 30
+
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from Strom where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from Wasser where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromWP where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromPV where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from Heizung where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+
+
+*/
+
+
+
 
 /**
  * 

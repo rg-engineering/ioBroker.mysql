@@ -670,7 +670,7 @@
 
 
     vis.binds.mysql = {
-        version: "0.0.1",
+        version: "0.0.6",
         showVersion: function () {
             if (vis.binds.mysql.version) {
                 console.log('Version vis-mysql: ' + vis.binds.mysql.version);
@@ -805,7 +805,7 @@
                     console.log('GridMarkings: DayDiff ' + dayDiff + ' (' + axes.xaxis.max + ' ' + axes.xaxis.min + ')');
 
                     var i = minDate.getTime();
-
+                    let limit = 0;
                     if (dayDiff > 400) { //in years
                         minDate.setHours(0);
                         minDate.setMinutes(0);
@@ -813,6 +813,7 @@
                         minDate.setMonth(0);
                         var i = minDate.getTime();
                         var curDate;
+
                         do {
                             markings.push({ xaxis: { from: i, to: i + 12 * 30 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
 
@@ -825,11 +826,12 @@
                             minDate.setDate(1);
                             minDate.setMonth(0);
 
-                            console.log('GridMarkings (1): ' + minDate.toLocaleString());
+                            //console.log('GridMarkings (1): ' + minDate.toLocaleString());
 
                             i = minDate.getTime();
+                            limit++;
 
-                        } while (i < axes.xaxis.max);
+                        } while (i < axes.xaxis.max || limit > 200);
                     }
 
                     else if (dayDiff > 30) { // in months
@@ -838,6 +840,7 @@
                         minDate.setDate(1);
                         var i = minDate.getTime();
                         var curDate;
+
                         do {
                             markings.push({ xaxis: { from: i, to: i + 30 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
 
@@ -849,20 +852,23 @@
                             minDate.setMinutes(0);
                             minDate.setDate(1);
 
-                            console.log('GridMarkings  (2): ' + minDate.toLocaleString());
+                            //console.log('GridMarkings  (2): ' + minDate.toLocaleString());
 
                             i = minDate.getTime();
-                        } while (i < axes.xaxis.max);
+                            limit++;
+                        } while (i < axes.xaxis.max || limit > 200);
                     }
                     else if (dayDiff > 10) {
                         //if (dayDiff > 2) {
                         minDate.setHours(12);
                         minDate.setMinutes(0);
                         var i = minDate.getTime();
+
                         do {
                             markings.push({ xaxis: { from: i, to: i + 5 * 24 * 60 * 60 * 1000 }, color: MarkingColor });
                             i += 2 * 5 * 24 * 60 * 60 * 1000; //plus 5 days
-                        } while (i < axes.xaxis.max);
+                            limit++
+                        } while (i < axes.xaxis.max || limit > 200);
                     }
 
                     //if we only few hours then we need markings per hour otherwise per day
@@ -870,14 +876,16 @@
                         do {
                             markings.push({ xaxis: { from: i, to: i + 24 * 60 * 60 * 1000 }, color: MarkingColor });
                             i += 2 * 24 * 60 * 60 * 1000;
-                        } while (i < axes.xaxis.max);
+                            limit++;
+                        } while (i < axes.xaxis.max || limit > 200);
 
                     }
                     else {
                         do {
                             markings.push({ xaxis: { from: i, to: i + 60 * 60 * 1000 }, color: MarkingColor });
                             i += 2 * 60 * 60 * 1000;
-                        } while (i < axes.xaxis.max);
+                            limt++;
+                        } while (i < axes.xaxis.max || limit > 200);
                     }
                     return markings;
 
@@ -897,6 +905,7 @@
 
                     console.log('CalcTicks4X: DayDiff ' + dayDiff + ' (' + axis.max + ' ' + axis.min + ')');
 
+                    let limit = 0;
                     if (dayDiff > 400) { //in years
                         minDate.setHours(12);
                         minDate.setMinutes(0);
@@ -916,11 +925,12 @@
                             minDate.setDate(15);
                             minDate.setMonth(5);
 
-                            console.log('CalcTicks4X (1): ' + minDate.toLocaleString());
+                            //console.log('CalcTicks4X (1): ' + minDate.toLocaleString());
 
                             i = minDate.getTime();
+                            limit++;
 
-                        } while (i < axis.max);
+                        } while (i < axis.max || limit > 200);
                     }
 
                     else if (dayDiff > 30) { // in months
@@ -939,10 +949,11 @@
                             minDate.setMinutes(0);
                             minDate.setDate(15);
 
-                            console.log('CalcTicks4X  (2): ' + minDate.toLocaleString());
+                            //console.log('CalcTicks4X  (2): ' + minDate.toLocaleString());
 
                             i = minDate.getTime();
-                        } while (i < axis.max);
+                            limit++;
+                        } while (i < axis.max || limit > 200);
                     }
                     else if (dayDiff > 10) {
                         //if (dayDiff > 2) {
@@ -952,7 +963,8 @@
                         do {
                             ticks.push([i]);
                             i += 5 * 24 * 60 * 60 * 1000; //plus 5 days
-                        } while (i < axis.max);
+                            limit++;
+                        } while (i < axis.max || limit > 200);
                     }
 
                     else if (dayDiff > 2) {
@@ -963,7 +975,8 @@
                         do {
                             ticks.push([i]);
                             i += 24 * 60 * 60 * 1000; //plus a day
-                        } while (i < axis.max);
+                            limit++;
+                        } while (i < axis.max || limit > 200);
                     }
                     else {
                         minDate.setHours(0);
@@ -972,29 +985,33 @@
                         do {
                             ticks.push([i]);
                             i += 6 * 60 * 60 * 1000; //plus 6 hours
-                        } while (i < axis.max);
+                            limit++;
+                        } while (i < axis.max || limit > 200);
                     }
                     return ticks;
                 }
 
-
+                //should avoid endles loops
+                let UpdateRetryCounter = 0;
 
                 function update() {
 
-                    console.log("ShowChart mysql  (" + widgetID + ")");
+                    console.log("ShowChart mysql  (" + widgetID + ") retry counter " + UpdateRetryCounter);
 
                     var $div = $('#' + widgetID);
                     // if nothing found => wait
                     if (!$div.length) {
                         return setTimeout(function () {
                             console.log("need to wait... (" + widgetID + ")");
-                            update();
+                            if (UpdateRetryCounter < 5) {
+                                UpdateRetryCounter++;
+                                update();
+                            }
                         }, 1000);
                     }
 
+                    UpdateRetryCounter = 0;
                     console.log("ShowChart mysql begin (" + widgetID + ")");
-
-
 
                     SetMarkingColor(data.markingcolor);
                     SetUnit(data.unit);
@@ -1021,7 +1038,7 @@
 
                         var $sel = vis.binds.mysql.setup.datasel[data.valueselect];
 
-                        console.log("sel " + $sel);
+                        //console.log("sel " + $sel);
 
 
                         for (var i = 0; i < oData.length; i++) {
@@ -1056,7 +1073,7 @@
                                 dateMax = date;
 
                                 values.push([oDate, value]);
-                                console.log("push " + oDate.toDateString() + " : " + value);
+                                //console.log("push " + oDate.toDateString() + " : " + value);
                             }
                             else if ($sel == 2) {
                                 var oVals = oData[i];
@@ -1085,7 +1102,7 @@
                                 }
                                 dateMax = date;
                                 values.push([oDate, value]);
-                                console.log("push " + oDate.toDateString() + " : " + value);
+                                //console.log("push " + oDate.toDateString() + " : " + value);
                             }
                             else if ($sel == 3) {
                                 var oVals = oData[i];
@@ -1103,7 +1120,7 @@
                                 var month = parseInt(DateArray[1], 10);
                                 var year = parseInt(DateArray[0], 10);
 
-                                console.log("array " + DateArray[0] + " / " + DateArray[1]);
+                                //console.log("array " + DateArray[0] + " / " + DateArray[1]);
 
                                 month--;
 
@@ -1119,7 +1136,7 @@
                                 dateMax = date;
                                 values.push([oDate, value]);
 
-                                console.log("push " + oDate.toDateString() + " : " + value);
+                                //console.log("push " + oDate.toDateString() + " : " + value);
                             }
                             else if ($sel == 4) {
                                 var oVals = oData[i];
@@ -1141,7 +1158,7 @@
 
                                 values.push([oDate, value]);
 
-                                console.log("push " + oDate.toDateString() + " : " + value);
+                                //console.log("push " + oDate.toDateString() + " : " + value);
 
                             }
                         }
@@ -1355,7 +1372,7 @@
 
                 var $sel = vis.widgets[widgetID].data.valueselect;
 
-                console.log("+++++++ " + $sel + " " + vis.binds.mysql.setup.datasel[$sel]);
+                //console.log("+++++++ " + $sel + " " + vis.binds.mysql.setup.datasel[$sel]);
 
                 switch (vis.binds.mysql.setup.datasel[$sel]) {
                     case 1:
@@ -1403,7 +1420,6 @@
         data-vis-update-style="true"
         data-vis-prev='<img src="widgets/mysql/img/Prev_tplmysql.png"></img>'
         data-vis-attrs="time_interval[30 minutes]/select,1 second,10 seconds,30 seconds,1 minute,2 minutes,5 minutes,10 minutes,30 minutes,1 hour,2 hours,4 hours,8 hours,12 hours,24 hours;valueselect[sel_today]/select,sel_today,sel_last30days,sel_last12months,sel_years/onInstanceChanged;"
-       
         data-vis-attrs0="withxaxix[true]/checkbox;axislabelcolor[#ffffff]/color;tickscolor[#ffffff]/color;LabelFontSize[8];LabelFontFamily[Arial]/fontname;withmarking[true]/checkbox;markingcolor[#eaebe5]/color;"
         data-vis-attrs1="borderWidth[1];bordercolor[#000000]/color;nobgcolor[true]/checkbox;bgcolor[#FFFFFF]/color;withlegend[false]/checkbox;legendposition[ne]/select,ne,nw,se,sw;"
         data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_watthour,sel_m3,sel_liter;"
