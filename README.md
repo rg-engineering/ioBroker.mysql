@@ -30,6 +30,9 @@ interface to mySQL database
 
 ## Changelog
 
+### 0.0.7 (in progress)
+* (René) bug fix color of labels in widget
+
 ### 0.0.6 (2021-10-30)
 * (René) avoid endless loop
 * (René) update flot to 4.2.2
