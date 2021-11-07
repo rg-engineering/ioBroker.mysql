@@ -30,7 +30,7 @@ interface to mySQL database
 
 ## Changelog
 
-### 0.0.7 (in progress)
+### 0.0.7 (2021-11-07)
 * (René) bug fix color of labels in widget
 
 ### 0.0.6 (2021-10-30)
