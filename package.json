@@ -19,7 +19,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "2.5.1",
     "@sentry/node": "6.14.1",
-    "mysql2": "2.3.2"
+    "mysql2": "2.3.3"
   },
   "devDependencies": {
     "@iobroker/testing": "2.5.2",
