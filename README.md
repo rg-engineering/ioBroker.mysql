@@ -23,12 +23,10 @@ interface to mySQL database
 
 
 
-## Developer manual
-
-
-
-
 ## Changelog
+
+### 0.0.9 (in progress)
+* (René) overrun handling in import
 
 ### 0.0.7 (2021-11-07)
 * (René) bug fix color of labels in widget
@@ -53,7 +51,7 @@ interface to mySQL database
 ## License
 MIT License
 
-Copyright (c) 2019-2021 rg-engineering <info@rg-engineering.eu>
+Copyright (c) 2019-2022 rg-engineering <info@rg-engineering.eu>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

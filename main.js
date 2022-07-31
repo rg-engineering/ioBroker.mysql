@@ -46,10 +46,10 @@ function startAdapter(options) {
         },
         //#######################################
         //
-        SIGINT: function () {
-            adapter && adapter.log && adapter.log.info && adapter.log.info("cleaned everything up...");
-            Disconnect();
-        },
+        //SIGINT: function () {
+        //    adapter && adapter.log && adapter.log.info && adapter.log.info("cleaned everything up...");
+        //    Disconnect();
+        //},
         //#######################################
         //  is called if a subscribed object changes
         //objectChange: function (id, obj) {
@@ -105,6 +105,9 @@ async function main() {
         await SubscribeStates();
 
         await adapter.setStateAsync("vis.Status", { val: "ready", ack: true });
+
+
+        await TestUpdateDB();
        
     }
     catch (e) {
@@ -400,6 +403,16 @@ async function WriteRow(querystring, row, datatypes) {
             querystring += val;
             cnt++;
         }
+        else if (datatypes[j] == "number") {
+
+            const val = RemoveChars(row[j]);
+
+            if (cnt > 0) {
+                querystring += ", ";
+            }
+            querystring += val;
+            cnt++;
+        }
         else if (datatypes[j] != "none") {
             if (cnt > 0) {
                 querystring += ", ";
@@ -441,19 +454,21 @@ async function FillUpData(current, last, rowCells, preparedQuery, datatypes) {
         diffDays--;
 
         const ValuePerDay = current.diff / diffDays;
-        let NewValue = last.value;
+        let NewValue_Gesamt = last.value_gesamt;
+        let NewValue_Org = last.value_org;
         const NewDate = last.date;
 
         adapter.log.debug("day diff " + diffDays + " value per day " + ValuePerDay + " " + current.diff);
 
         for (let d = 0; d < diffDays; d++) {
-            NewValue += ValuePerDay;
+            NewValue_Gesamt += ValuePerDay;
+            NewValue_Org += ValuePerDay;
 
             //const nTime = NewDate.getTime();
             //NewDate = new Date(nTime + (1000 * 60 * 60 * 24));
             NewDate.setDate(NewDate.getDate() + 1);
 
-            adapter.log.debug("interpolation day " + NewDate.toDateString() + " value " + NewValue);
+            adapter.log.debug("interpolation day " + NewDate.toDateString() + " value org " + NewValue_Org + " value gesamt " + NewValue_Gesamt);
 
             querystring = preparedQuery;
 
@@ -464,18 +479,22 @@ async function FillUpData(current, last, rowCells, preparedQuery, datatypes) {
             //prepare row
 
             rowCells[0] = NewDate.getFullYear() + "-" + (NewDate.getMonth() + 1) + "-" + NewDate.getDate();
-            rowCells[1] = NewValue;
-            rowCells[3] = ValuePerDay;
+            rowCells[1] = NewValue_Gesamt;
+            rowCells[2] = ValuePerDay;
+            rowCells[3] = NewValue_Org;
 
-
+            /*
+            2022 - 07 - 31 08: 45: 05.841 - [34mdebug[39m: mysql.0(57023) query INSERT INTO Heizung(Datum, Zaehlerstand_Gesamt, Verbrauch_taeglich, Zaehlerstand_Org)  VALUES('2022-7-18', 69555, 0, 11, 4020)
+            2022 - 07 - 31 08: 45: 05.907 - [31merror[39m: mysql.0(57023) exception in VisUpdate[Error: Column count doesn't match value count at row 1]
+            */
 
             await WriteRow(querystring, rowCells, datatypes);
 
-            adapter.log.debug("**##*** " + rowCells[0] + " " + current.date.toDateString() + " " + rowCells[1] + " " + rowCells[3]);
+            adapter.log.debug("**##*** " + rowCells[0] + " " + current.date.toDateString() + " " + rowCells[1] + " " + rowCells[2]);
         }
 
-        if (Math.abs(NewValue - current.value) > 1) {
-            adapter.log.warn("calculation diff " + NewValue + " / " + current.value);
+        if (Math.abs(NewValue_Gesamt - current.value) > 1) {
+            adapter.log.warn("calculation diff " + NewValue_Gesamt + " / " + current.value);
         }
     }
     else {
@@ -488,9 +507,10 @@ async function FillUpData(current, last, rowCells, preparedQuery, datatypes) {
 
         rowCells[0] = current.date.getFullYear() + "-" + (current.date.getMonth() + 1) + "-" + current.date.getDate();
         rowCells[1] = current.value;
-        rowCells[3] = current.diff;
+        rowCells[2] = current.diff;
+        rowCells[3] = current.value;
 
-        adapter.log.debug("***** " + rowCells[0] + " " + current.date.toDateString() + " " + rowCells[1] + " " + rowCells[3]);
+        adapter.log.debug("***** " + rowCells[0] + " " + current.date.toDateString() + " " + rowCells[1] + " " + rowCells[2]);
 
 
         await WriteRow(querystring, rowCells, datatypes);
@@ -1012,14 +1032,14 @@ async function VisOpened() {
                 adapter.log.debug("got result: " + JSON.stringify(rows1));
                 if (rows1.length > 0) {
 
-                    const lastValue = rows1[0].Zaehlerstand;
+                    const lastValue_org = rows1[0].Zaehlerstand_Org;
                     const lastDate = new Date(rows1[0].Datum);
 
 
                     
-                    adapter.log.debug("got last value for " + tablename + " : " + lastValue + " from " + lastDate + " " );
+                    adapter.log.debug("got last value for " + tablename + " : " + lastValue_org + " from " + lastDate + " " );
 
-                    await adapter.setStateAsync("vis.NewValue_" + tablename, lastValue);
+                    await adapter.setStateAsync("vis.NewValue_" + tablename, lastValue_org);
 
                     await adapter.setStateAsync("vis.LastUpdate_" + tablename, lastDate.toDateString());
 
@@ -1059,65 +1079,72 @@ async function VisUpdate() {
 
         if (rows.length > 0) {
 
+            //über alle Tabellen
             for (const i in rows) {
 
                 //get last data row in database
-                let LastImportValue;
+                let LastImportValue_org;
+                let LastImportValue_gesamt;
                 let LastImportDate;
                 const tablename = rows[i][fields[0].name];
 
                 await adapter.setStateAsync("vis.Status", { val: "updating " + tablename, ack: true });
 
+                //hole letzten Datensatz
                 const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
                 adapter.log.debug("query: " + querystring);
 
                 const [rows1, fields1] = await mysql_connection.query(querystring);
 
                 adapter.log.debug("got result: " + JSON.stringify(rows1));
+
+                /*
+                2022 - 07 - 31 08: 25: 08.515	info	undefined is not a valid state value for id "mysql.0.vis.NewValue_Heizung"
+                2022 - 07 - 31 08: 25: 08.514	debug	got last value for Heizung : undefined from Sun Jul 17 2022 00: 00: 00 GMT + 0200(Central European Summer Time)
+                2022 - 07 - 31 08: 25: 08.513	debug	got result: [{ "ID": 4962, "Datum": "2022-07-16T22:00:00.000Z", "Zaehlerstand_Gesamt": 69544, "Verbrauch_taeglich": 18.1429, "Zaehlerstand_Org": 4009, "Zaehlertausch": 0, "Ueberlauf": 0 }]
+                2022 - 07 - 31 08: 25: 08.498	debug	query: select * from Heizung order by Datum DESC limit 1
+                */
+
                 if (rows1.length > 0) {
 
-                    LastImportValue = rows1[0].Zaehlerstand;
+                    LastImportValue_org = rows1[0].Zaehlerstand_Org;
+                    LastImportValue_gesamt = rows1[0].Zaehlerstand_Gesamt;
                     LastImportDate = new Date(rows1[0].Datum);
-                    adapter.log.debug("got last value for " + tablename + " : " + LastImportValue + " from " + LastImportDate.toDateString());
+
+                    adapter.log.debug("got last value for " + tablename +  " org: " + LastImportValue_org + " gesamt: " + LastImportValue_gesamt + " from " + LastImportDate.toDateString());
                 }
 
-                const importValue = await adapter.getStateAsync("vis.NewValue_" + tablename);
+                const importVal = await adapter.getStateAsync("vis.NewValue_" + tablename);
 
-                const importDiff = importValue.val - LastImportValue;
+                let importValue = importVal.val;
 
-                adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue.val + " " + importDiff);
+                const importDiff = importValue - LastImportValue_org;
+
+                adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue + " " + importDiff);
 
                 const current = {
-                    value: importValue.val,
+                    value: importValue,
                     diff: importDiff,
-                    date: importDate
+                    date: importDate,
                 };
 
                 const last = {
-                    value: LastImportValue,
+                    value_org: LastImportValue_org,
+                    value_gesamt: LastImportValue_gesamt,
                     date: LastImportDate
                 };
 
-                if (importValue.val >= LastImportValue) {
+                if (importDate > LastImportDate) {
+                    const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand_Gesamt,Verbrauch_taeglich,Zaehlerstand_Org )  VALUES (";
+                    const rowCells = [0, 0, 0, 0];
+                    const datatypes = ["date", "float", "float", "float"];
 
-                    if (importDate > LastImportDate) {
-                        const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand,Verbrauch)  VALUES (";
-                        const rowCells = [0, 0, 0, 0];
-                        const datatypes = ["date", "float", "none", "float"];
-
-                        await FillUpData(current, last, rowCells, prequerystring, datatypes);
-                    }
-                    else {
-                        await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
-                        adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
-                    }
+                    await FillUpData(current, last, rowCells, prequerystring, datatypes);
                 }
                 else {
                     await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
-                    adapter.log.error("new value smaller than old value" + importValue.val + " < " + LastImportValue);
+                    adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
                 }
-
-
             }
         }
     }
@@ -1139,6 +1166,63 @@ async function VisUpdate() {
     await adapter.setStateAsync("vis.Status", { val: "all done", ack: true });
     adapter.log.info("### finished");
 }
+
+//nur um DB anzupassen, wird dann wieder entfernt
+async function TestUpdateDB() {
+
+    let querystring = "select * from `Heizung` where Zaehlerstand_Org = 0 and Datum > '2022-01-01'  ";
+
+    adapter.log.debug("query: " + querystring);
+
+    let [rows, fields] = await mysql_connection.query(querystring);
+
+    //adapter.log.debug("got result: " + JSON.stringify(rows));
+
+    if (rows.length > 0) {
+
+        var newValue = 0;
+        var lastValue = 65535;
+        for (const i in rows) {
+            //Achtung Unterschied Zählertausch (-letzter wert) und Overrun (-65535)
+            newValue = rows[i].Zaehlerstand_Gesamt - lastValue;
+            adapter.log.debug("new Zaehlerstand_Org : " + newValue + " gesamt " + rows[i].Zaehlerstand_Gesamt);
+
+            querystring = "UPDATE `Heizung` SET `Zaehlerstand_Org`=" + newValue + " where ID=" + rows[i].ID;
+            adapter.log.debug("query: " + querystring);
+            await mysql_connection.query(querystring);
+
+        }
+    }
+
+
+    querystring = "select * from `Wasser` where Zaehlerstand_Org = 0 and Datum > '2022-01-01'  ";
+
+    adapter.log.debug("query: " + querystring);
+
+    [rows, fields] = await mysql_connection.query(querystring);
+
+    //adapter.log.debug("got result: " + JSON.stringify(rows));
+
+    if (rows.length > 0) {
+
+        var newValue = 0;
+        var lastValue = 547;
+        for (const i in rows) {
+            //Achtung Unterschied Zählertausch (-letzter wert) und Overrun (-65535)
+            newValue = rows[i].Zaehlerstand_Gesamt - lastValue;
+            adapter.log.debug("new Zaehlerstand_Org : " + newValue + " gesamt " + rows[i].Zaehlerstand_Gesamt);
+
+            querystring = "UPDATE `Wasser` SET `Zaehlerstand_Org`=" + newValue + " where ID=" + rows[i].ID;
+            adapter.log.debug("query: " + querystring);
+            await mysql_connection.query(querystring);
+        }
+
+
+    }
+
+}
+
+
 
 /*
 select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Strom group by DATE_FORMAT(DATUM, "%Y")
@@ -1171,118 +1255,7 @@ select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlers
 
 
 
-/**
- * 
- * 
- * @param {string} timeVal
- * @param {string} timeLimit
- */
-/*
-function IsLater(timeVal, timeLimit) {
 
-    let ret = false;
-    try {
-        adapter.log.debug("check IsLater : " + timeVal + " " + timeLimit);
-
-        if (typeof timeVal === "string" && typeof timeLimit === "string") {
-            const valIn = timeVal.split(":");
-            const valLimits = timeLimit.split(":");
-
-            if (valIn.length > 1 && valLimits.length > 1) {
-
-                if (parseInt(valIn[0]) > parseInt(valLimits[0])
-                    || (parseInt(valIn[0]) == parseInt(valLimits[0]) && parseInt(valIn[1]) > parseInt(valLimits[1]))) {
-                    ret = true;
-                    adapter.log.debug("yes, IsLater : " + timeVal + " " + timeLimit);
-                }
-            }
-            else {
-                adapter.log.error("string does not contain : " + timeVal + " " + timeLimit);
-            }
-        }
-        else {
-            adapter.log.error("not a string " + typeof timeVal + " " + typeof timeLimit);
-        }
-    }
-    catch (e) {
-        adapter.log.error("exception in IsLater [" + e + "]");
-    }
-    return ret;
-}
-*/
-/**
- * @param {string } timeVal
- * @param {string } [timeLimit]
- */
-/*
-function IsEarlier(timeVal, timeLimit) {
-
-    let ret = false;
-    try {
-        adapter.log.debug("check IsEarlier : " + timeVal + " " + timeLimit);
-
-        if (typeof timeVal === "string" && typeof timeLimit === "string") {
-            const valIn = timeVal.split(":");
-            const valLimits = timeLimit.split(":");
-
-            if (valIn.length > 1 && valLimits.length > 1) {
-
-                if (parseInt(valIn[0]) < parseInt(valLimits[0])
-                    || (parseInt(valIn[0]) == parseInt(valLimits[0]) && parseInt(valIn[1]) < parseInt(valLimits[1]))) {
-                    ret = true;
-                    adapter.log.debug("yes, IsEarlier : " + timeVal + " " + timeLimit);
-                }
-            }
-            else {
-                adapter.log.error("string does not contain : " + timeVal + " " + timeLimit);
-            }
-        }
-        else {
-            adapter.log.error("not a string " + typeof timeVal + " " + typeof timeLimit);
-        }
-    }
-    catch (e) {
-        adapter.log.error("exception in IsEarlier [" + e + "]");
-    }
-    return ret;
-}
-*/
-/**
- * @param {string} timeVal
- * @param {string} timeLimit
- */
-/*
-function IsEqual(timeVal, timeLimit) {
-
-    let ret = false;
-    try {
-        adapter.log.debug("check IsEqual : " + timeVal + " " + timeLimit);
-
-        if (typeof timeVal === "string" && typeof timeLimit === "string") {
-            const valIn = timeVal.split(":");
-            const valLimits = timeLimit.split(":");
-
-            if (valIn.length > 1 && valLimits.length > 1) {
-
-                if (parseInt(valIn[0]) === parseInt(valLimits[0]) && parseInt(valIn[1]) === parseInt(valLimits[1])) {
-                    ret = true;
-                    adapter.log.debug("yes, IsEqual : " + timeVal + " " + timeLimit);
-                }
-            }
-            else {
-                adapter.log.error("string does not contain : " + timeVal + " " + timeLimit);
-            }
-        }
-        else {
-            adapter.log.error("not a string " + typeof timeVal + " " + typeof timeLimit);
-        }
-    }
-    catch (e) {
-        adapter.log.error("exception in IsEqual [" + e + "]");
-    }
-    return ret;
-}
-*/
 // If started as allInOne/compact mode => return function to create instance
 if (module && module.parent) {
     module.exports = startAdapter;

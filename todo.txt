@@ -5,6 +5,35 @@
 * widget
   * einheit einstellbar
 
+* Zählerüberlauf / Tausch
+
 * Auswertung (sql Abfrage und Anzeige im vis)
-    * letze 12 Monate
-    * letze 30 Tage
+    * letzte 12 Monate
+    * letzte 30 Tage
+    * letzte Jahre
+    * letzten 5 Wochen
+
+
+* Abfragen exportieren und importieren
+
+
+Umbau:
+* Spalten
+      	Zaehlerstand nach Zaehlerstand_Gesamt (float)
+        Verbrauch nach Verbrauch_taeglich (float)
+        Zaehlerstand_Org (float)
+        overflow nach  	Zaehlertausch (bool) 
+        Ueberlauf (bool)
+
+* kopieren
+    UPDATE Heizung SET Zaehlerstand_Org = Zaehlerstand_Gesamt;
+    UPDATE Heizung SET Zaehlerstand_Org = 0 WHERE Zaehlerstand_Gesamt > 65535
+        137 Datensätze, ab 11.3.2022
+    + Überlauf auch früher
+
+    UPDATE Strom SET Zaehlerstand_Org = Zaehlerstand_Gesamt;
+    UPDATE StromPV SET Zaehlerstand_Org = Zaehlerstand_Gesamt;
+    UPDATE StromWP SET Zaehlerstand_Org = Zaehlerstand_Gesamt;
+    UPDATE Wasser SET Zaehlerstand_Org = Zaehlerstand_Gesamt;
+    UPDATE Wasser SET Zaehlerstand_Org = 0 WHERE Zaehlerstand_Gesamt > 547
+        123 Datensätze
