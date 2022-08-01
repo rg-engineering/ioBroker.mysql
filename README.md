@@ -25,7 +25,10 @@ interface to mySQL database
 
 ## Changelog
 
-### 0.0.9 (in progress)
+### 0.0.10 (in progress)
+* (René) bug fix in widget: scale Y from 0 and typo fixed
+
+### 0.0.9 (2022-07-31)
 * (René) overrun handling in import
 
 ### 0.0.7 (2021-11-07)
