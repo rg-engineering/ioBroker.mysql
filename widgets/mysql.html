@@ -9,6 +9,9 @@
 -->
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.canvaswrapper.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.colorhelpers.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/lib/jquery.event.drag.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/lib/jquery.mousewheel.js"></script>
+
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.saturated.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.browser.js"></script>
@@ -16,7 +19,11 @@
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.uiConstants.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.time.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.legend.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.navigate.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.touchNavigate.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.hover.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.touch.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.selection.js"></script>
 
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.axislabels_V2.js"></script>
 
@@ -716,9 +723,10 @@
                     }
 
                 }
-                //**********************************************************
-                //hover
 
+                //****************************************************************************************
+                //hover
+                console.log("hover start");
                 $("<div id='tooltip'></div>").css({
                     position: "absolute",
                     display: "none",
@@ -730,27 +738,29 @@
 
                 $div.bind("plothover", function (event, pos, item) {
 
+                    console.log("plothover");
+
                     if (!pos.x || !pos.y) {
                         return;
                     }
 
-                    if ($("#enablePosition:checked").length > 0) {
-                        var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
-                        $("#hoverdata").text(str);
+
+                    var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
+                    $("#hoverdata").text(str);
+
+
+
+                    if (item) {
+                        var x = item.datapoint[0].toFixed(2),
+                            y = item.datapoint[1].toFixed(2);
+
+                        $("#tooltip").html(item.series.label + " of " + x + " = " + y)
+                            .css({ top: item.pageY + 5, left: item.pageX + 5 })
+                            .fadeIn(200);
+                    } else {
+                        $("#tooltip").hide();
                     }
 
-                    if ($("#enableTooltip:checked").length > 0) {
-                        if (item) {
-                            var x = item.datapoint[0].toFixed(2),
-                                y = item.datapoint[1].toFixed(2);
-
-                            $("#tooltip").html(item.series.label + " of " + x + " = " + y)
-                                .css({ top: item.pageY + 5, left: item.pageX + 5 })
-                                .fadeIn(200);
-                        } else {
-                            $("#tooltip").hide();
-                        }
-                    }
                 });
 
                 $div.bind("plothovercleanup", function (event, pos, item) {
@@ -765,10 +775,8 @@
                 });
 
 
+                //****************************************************************************************
 
-
-
-                //**********************************************************
 
                 function SetMarkingColor(color) {
                     MarkingColor = color;
@@ -781,9 +789,12 @@
 
                 function formater(val, axis) {
 
-                    console.log('legendformater unit ' + formaterUnit );
+                    console.log('legendformater unit ' + formaterUnit);
 
-                    if (formaterUnit=="sel_watthour") {
+                    if (formaterUnit == "sel_kwatthour") {
+                        return xwhFormatter(val*1000, axis);
+                    }
+                    else if (formaterUnit == "sel_watthour") {
                         return xwhFormatter(val, axis);
                     }
                     else if (formaterUnit == "sel_watt") {
@@ -795,7 +806,7 @@
                     else if (formaterUnit == "sel_m3") {
                         return xm3Formatter(val, axis);
                     }
-                    else  {
+                    else {
                         return val.toFixed(axis.tickDecimals);
                     }
                 }
@@ -1338,7 +1349,7 @@
                                         color: data.colorticklabel,
 
                                     },
-                                    tickFormatter: formater 
+                                    tickFormatter: formater
                                 },
 
                                 ],
@@ -1376,6 +1387,13 @@
                                 backgroundOpacity: 0,
                                 container: null,
                                 sorted: false
+                            },
+                            zoom: {
+                                interactive: true
+                            },
+                            pan: {
+                                interactive: true,
+                                enableTouch: true
                             }
                         }
                     );
@@ -1486,7 +1504,7 @@
         data-vis-attrs="time_interval[30 minutes]/select,1 second,10 seconds,30 seconds,1 minute,2 minutes,5 minutes,10 minutes,30 minutes,1 hour,2 hours,4 hours,8 hours,12 hours,24 hours;valueselect[sel_today]/select,sel_today,sel_last30days,sel_last12months,sel_years/onInstanceChanged;"
         data-vis-attrs0="withxaxix[true]/checkbox;axislabelcolor[#ffffff]/color;tickscolor[#ffffff]/color;LabelFontSize[8];LabelFontFamily[Arial]/fontname;withmarking[true]/checkbox;markingcolor[#eaebe5]/color;"
         data-vis-attrs1="borderWidth[1];bordercolor[#000000]/color;nobgcolor[true]/checkbox;bgcolor[#FFFFFF]/color;withlegend[false]/checkbox;legendposition[ne]/select,ne,nw,se,sw;"
-        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_watthour,sel_m3,sel_liter;"
+        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_kwatthour,sel_m3,sel_liter;ValueFactor[1];"
         data-vis-attrs3="group.oids;oid_value/id;">
 
     <div class="vis-widget <%== this.data.attr('class') %>" style="overflow: hidden;" id="<%= this.data.attr('wid') %>">
