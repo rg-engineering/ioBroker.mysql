@@ -4,13 +4,15 @@
 
     Copyright 10.2015-2020 René G. <info@rg-engineering.eu>
 -->
-<!--
-<script language="javascript" type="text/javascript" src="widgets/weather/lib/js/flot/jquery.js"></script>
--->
-<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.canvaswrapper.js"></script>
-<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.colorhelpers.js"></script>
+
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.js"></script>
+
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/lib/jquery.event.drag.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/lib/jquery.mousewheel.js"></script>
+
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.canvaswrapper.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.colorhelpers.js"></script>
+
 
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.saturated.js"></script>
@@ -25,7 +27,7 @@
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.touch.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.selection.js"></script>
 
-<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.axislabels_V2.js"></script>
+<script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.flot.axislabels.js"></script>
 
 <!-- doku for flot : -->
 <!--  https://github.com/flot/flot/blob/master/API.md -->
@@ -792,7 +794,7 @@
                     console.log('legendformater unit ' + formaterUnit);
 
                     if (formaterUnit == "sel_kwatthour") {
-                        return xwhFormatter(val*1000, axis);
+                        return xwhFormatter(val * 1000, axis);
                     }
                     else if (formaterUnit == "sel_watthour") {
                         return xwhFormatter(val, axis);
