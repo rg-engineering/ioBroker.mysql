@@ -25,7 +25,9 @@ interface to mySQL database
 
 ## Changelog
 
-### 0.0.10 (in progress)
+### 0.0.12 (2022-08-14)
+* (René) toltip in wizard added
+* (René) flot and dependencies updated
 * (René) bug fix in widget: scale Y from 0 and typo fixed
 
 ### 0.0.9 (2022-07-31)

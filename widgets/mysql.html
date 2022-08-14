@@ -4,9 +4,9 @@
 
     Copyright 10.2015-2020 René G. <info@rg-engineering.eu>
 -->
-
+<!--
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/flot/jquery.js"></script>
-
+    -->
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/lib/jquery.event.drag.js"></script>
 <script language="javascript" type="text/javascript" src="widgets/mysql/lib/js/lib/jquery.mousewheel.js"></script>
 
@@ -672,7 +672,93 @@
                 "es": "posición de leyenda",
                 "pl": "pozycja legendy",
                 "zh-cn": "图例位置"
+            },
+
+            "sel_watt": {
+                "en": "Watt",
+                "de": "Watt",
+                "ru": "Ватт",
+                "pt": "Watts",
+                "nl": "Watt",
+                "fr": "Watt",
+                "it": "Watt",
+                "es": "Watt",
+                "pl": "Watt",
+                "zh-cn": "Watt"
+            },
+            "sel_kwatthour": {
+                "en": "kWh",
+                "de": "kWh",
+                "ru": "к Вх",
+                "pt": "k O quê",
+                "nl": "k Wat",
+                "fr": "k Wh",
+                "it": "# #",
+                "es": "k Wh",
+                "pl": "k W",
+                "zh-cn": "页: 1 Wh"
+            },
+            "sel_m3": {
+                "en": "m³",
+                "de": "m³",
+                "ru": "m³",
+                "pt": "m³",
+                "nl": "m³",
+                "fr": "m³",
+                "it": "m³",
+                "es": "m³",
+                "pl": "m³",
+                "zh-cn": "m³"
+            },
+            "sel_liter": {
+                "en": "liter",
+                "de": "liter",
+                "ru": "литера",
+                "pt": "litro",
+                "nl": "liter",
+                "fr": "litre",
+                "it": "litro",
+                "es": "litro",
+                "pl": "liter",
+                "zh-cn": "导 言"
+            },
+            "sel_none": {
+                "en": "none",
+                "de": "keine",
+                "ru": "нет",
+                "pt": "nenhum",
+                "nl": "niemand",
+                "fr": "aucun",
+                "it": "nessuno",
+                "es": "ninguno",
+                "pl": "żaden",
+                "zh-cn": "无"
+            },
+            "ValueFactor": {
+                "en": "value correction factor",
+                "de": "Wertkorrekturfaktor",
+                "ru": "фактор коррекции ценности",
+                "pt": "fator de correção de valor",
+                "nl": "waarderingsfactor",
+                "fr": "facteur de correction de la valeur",
+                "it": "fattore di correzione del valore",
+                "es": "factor de corrección",
+                "pl": "współczynnik poprawności",
+                "zh-cn": "价值更正"
+            },
+            "WithHOver": {
+                "en": "With Value box",
+                "de": "Mit Wertbox",
+                "ru": "С коробкой ценности",
+                "pt": "Com caixa de valor",
+                "nl": "Met Value box",
+                "fr": "Avec boîte de valeur",
+                "it": "Con Valore",
+                "es": "Con caja de valor",
+                "pl": "Wagon z Value",
+                "zh-cn": "价值箱"
             }
+
         });
     }
 
@@ -680,7 +766,7 @@
 
 
     vis.binds.mysql = {
-        version: "0.0.10",
+        version: "0.0.12",
         showVersion: function () {
             if (vis.binds.mysql.version) {
                 console.log('Version vis-mysql: ' + vis.binds.mysql.version);
@@ -726,58 +812,7 @@
 
                 }
 
-                //****************************************************************************************
-                //hover
-                console.log("hover start");
-                $("<div id='tooltip'></div>").css({
-                    position: "absolute",
-                    display: "none",
-                    border: "1px solid #fdd",
-                    padding: "2px",
-                    "background-color": "#fee",
-                    opacity: 0.80
-                }).appendTo("body");
-
-                $div.bind("plothover", function (event, pos, item) {
-
-                    console.log("plothover");
-
-                    if (!pos.x || !pos.y) {
-                        return;
-                    }
-
-
-                    var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
-                    $("#hoverdata").text(str);
-
-
-
-                    if (item) {
-                        var x = item.datapoint[0].toFixed(2),
-                            y = item.datapoint[1].toFixed(2);
-
-                        $("#tooltip").html(item.series.label + " of " + x + " = " + y)
-                            .css({ top: item.pageY + 5, left: item.pageX + 5 })
-                            .fadeIn(200);
-                    } else {
-                        $("#tooltip").hide();
-                    }
-
-                });
-
-                $div.bind("plothovercleanup", function (event, pos, item) {
-                    $("#tooltip").hide();
-                });
-
-                $div.bind("plotclick", function (event, pos, item) {
-                    if (item) {
-                        $("#clickdata").text(" - click point " + item.dataIndex + " in " + item.series.label);
-                        plot.highlight(item.series, item.datapoint);
-                    }
-                });
-
-
-                //****************************************************************************************
+                
 
 
                 function SetMarkingColor(color) {
@@ -815,27 +850,27 @@
 
 
                 function xwhFormatter(val, axis) {
-                    if (val > 1000000)
+                    if (Math.abs(val) > 1000000)
                         return (val / 1000000).toFixed(axis.tickDecimals) + " MWh";
-                    else if (val > 1000)
+                    else if (Math.abs(val) > 1000)
                         return (val / 1000).toFixed(axis.tickDecimals) + " kWh";
                     else
                         return val.toFixed(axis.tickDecimals) + " Wh";
                 }
 
                 function xwFormatter(val, axis) {
-                    if (val > 1000000)
+                    if (Math.abs(val) > 1000000)
                         return (val / 1000000).toFixed(axis.tickDecimals) + " MW";
-                    else if (val > 1000)
+                    else if (Math.abs(val) > 1000)
                         return (val / 1000).toFixed(axis.tickDecimals) + " kW";
                     else
                         return val.toFixed(axis.tickDecimals) + " W";
                 }
 
                 function xliterFormatter(val, axis) {
-                    if (val > 100)
+                    if (Math.abs(val) > 100)
                         return (val / 100).toFixed(axis.tickDecimals) + " hl";
-                    else if (val < 1)
+                    else if (Math.abs(val) < 1)
                         return (val * 10).toFixed(axis.tickDecimals) + " dl";
                     else
                         return val.toFixed(axis.tickDecimals) + " l";
@@ -1117,7 +1152,7 @@
                             if ($sel == 1) {
                                 var oVals = oData[i];
                                 var sDate = oVals["time"];
-                                var value = parseFloat(oVals["value"]);
+                                var value = data.ValueFactor * parseFloat(oVals["value"]);
 
                                 var DateArray = sDate.split(":");
                                 var minute = parseInt(DateArray[1], 10);
@@ -1145,7 +1180,7 @@
                             else if ($sel == 2) {
                                 var oVals = oData[i];
                                 var sDate = oVals["date"];
-                                var value = parseFloat(oVals["value"]);
+                                var value = data.ValueFactor * parseFloat(oVals["value"]);
 
                                 //2017-08-12
 
@@ -1174,7 +1209,7 @@
                             else if ($sel == 3) {
                                 var oVals = oData[i];
                                 var sDate = oVals["month"];
-                                var value = parseFloat(oVals["value"]);
+                                var value = data.ValueFactor * parseFloat(oVals["value"]);
 
                                 //2016-09
 
@@ -1208,7 +1243,7 @@
                             else if ($sel == 4) {
                                 var oVals = oData[i];
                                 var year = parseInt(oVals["year"], 10);
-                                var value = parseFloat(oVals["value"]);
+                                var value = data.ValueFactor *  parseFloat(oVals["value"]);
 
                                 //2016
 
@@ -1261,7 +1296,10 @@
                         minY = 0;
                     }
 
-                    $.plot($div,
+                    /*
+                    var $div = $('#' + widgetID);
+                    */
+                    $.plot($('#' + widgetID),
                         [{
                             data: values,
                             color: data.graphcolor,
@@ -1269,6 +1307,7 @@
                             xaxis: 1,
                             yaxis: 1,
                             lines: { show: false },
+                            points: { show: true },
                             bars:
                             {
                                 show: true,
@@ -1277,8 +1316,6 @@
                                 horizontal: false
                             }
                         },
-
-
                         ],
                         {
 
@@ -1401,6 +1438,120 @@
                     );
 
 
+                    //****************************************************************************************
+                    //hover
+
+                    console.log("hover start " + widgetID + " " + data.WithHOver );
+                    if (data.WithHOver) {
+                        console.log("hover start " + widgetID);
+                        $('#' + widgetID).bind("plotclick", function (event, pos, item) {
+                            console.log("clicked at " + pos.x + ", " + pos.y);
+                            // axis coordinates for other axes, if present, are in pos.x2, pos.x3, ...
+                            // if you need global screen coordinates, they are pos.pageX, pos.pageY
+
+                            if (item) {
+
+                                let x = item.datapoint[0];
+                                let y = item.datapoint[1].toFixed(2);
+
+                                console.log("clicked a point!" + item.series.label + " " + y + " on " + x);
+
+                                $("#tooltip").html("Wert " + y)
+                                    .css({ top: item.pageY + 5, left: item.pageX + 5 })
+                                    .fadeIn(200);
+
+                            }
+                            else {
+                                $("#tooltip").stop().hide();
+                            }
+                        });
+
+                        $("<div id='tooltip'></div>").css({
+                            position: "absolute",
+                            display: "none",
+                            border: "1px solid #fdd",
+                            padding: "2px",
+                            "background-color": "#fee",
+                            opacity: 0.80
+                        }).appendTo("body");
+
+                        /*
+                        $('#' + widgetID).bind('mouseleave', function (e) {
+                            console.log("mouseleave");
+                        });
+                        $('#' + widgetID).bind('mousedown', function (e) {
+                            console.log("mousedown");
+                        });
+                        $('#' + widgetID).bind('mouseup', function (e) {
+                            console.log("mouseup");
+                        });
+                        $('#' + widgetID).bind('mouseout', function (e) {
+                            console.log("mouseout");
+                        });
+                        $('#' + widgetID).bind('mouseenter', function (e) {
+                            console.log("mouseenter");
+                        });
+                        $('#' + widgetID).bind('touchend', function (e) {
+                            console.log("touchend");
+                        });
+                        */
+
+
+
+                        /*
+                        
+                        $("<div id='tooltip'></div>").css({
+                            position: "absolute",
+                            display: "none",
+                            border: "1px solid #fdd",
+                            padding: "2px",
+                            "background-color": "#fee",
+                            opacity: 0.80
+                        }).appendTo("body");
+        
+                        $div.bind("plothover", function (event, pos, item) {
+        
+                            console.log("plothover");
+        
+                            if (!pos.x || !pos.y) {
+                                return;
+                            }
+        
+        
+                            var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
+                            $("#hoverdata").text(str);
+        
+        
+        
+                            if (item) {
+                                var x = item.datapoint[0].toFixed(2),
+                                    y = item.datapoint[1].toFixed(2);
+        
+                                $("#tooltip").html(item.series.label + " of " + x + " = " + y)
+                                    .css({ top: item.pageY + 5, left: item.pageX + 5 })
+                                    .fadeIn(200);
+                            } else {
+                                $("#tooltip").hide();
+                            }
+        
+                        });
+        
+                        $div.bind("plothovercleanup", function (event, pos, item) {
+                            $("#tooltip").hide();
+                        });
+        
+                        $div.bind("plotclick", function (event, pos, item) {
+                            if (item) {
+                                $("#clickdata").text(" - click point " + item.dataIndex + " in " + item.series.label);
+                                plot.highlight(item.series, item.datapoint);
+                            }
+                        });
+        
+                        */
+                        //****************************************************************************************
+
+                    }
+
 
                 };
 
@@ -1506,7 +1657,7 @@
         data-vis-attrs="time_interval[30 minutes]/select,1 second,10 seconds,30 seconds,1 minute,2 minutes,5 minutes,10 minutes,30 minutes,1 hour,2 hours,4 hours,8 hours,12 hours,24 hours;valueselect[sel_today]/select,sel_today,sel_last30days,sel_last12months,sel_years/onInstanceChanged;"
         data-vis-attrs0="withxaxix[true]/checkbox;axislabelcolor[#ffffff]/color;tickscolor[#ffffff]/color;LabelFontSize[8];LabelFontFamily[Arial]/fontname;withmarking[true]/checkbox;markingcolor[#eaebe5]/color;"
         data-vis-attrs1="borderWidth[1];bordercolor[#000000]/color;nobgcolor[true]/checkbox;bgcolor[#FFFFFF]/color;withlegend[false]/checkbox;legendposition[ne]/select,ne,nw,se,sw;"
-        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_kwatthour,sel_m3,sel_liter;ValueFactor[1];"
+        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_kwatthour,sel_m3,sel_liter;ValueFactor[1];WithHOver[true]/checkbox"
         data-vis-attrs3="group.oids;oid_value/id;">
 
     <div class="vis-widget <%== this.data.attr('class') %>" style="overflow: hidden;" id="<%= this.data.attr('wid') %>">
