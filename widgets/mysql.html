@@ -757,6 +757,18 @@
                 "es": "Con caja de valor",
                 "pl": "Wagon z Value",
                 "zh-cn": "价值箱"
+            },
+            "WithPoints": {
+                "en": "with points",
+                "de": "mit Punkten",
+                "ru": "с точками",
+                "pt": "com pontos",
+                "nl": "met punten",
+                "fr": "avec points",
+                "it": "con punti",
+                "es": "con puntos",
+                "pl": "punkty",
+                "zh-cn": "要点"
             }
 
         });
@@ -1307,7 +1319,7 @@
                             xaxis: 1,
                             yaxis: 1,
                             lines: { show: false },
-                            points: { show: true },
+                            points: { show: data.WithPoints },
                             bars:
                             {
                                 show: true,
@@ -1454,7 +1466,9 @@
                                 let x = item.datapoint[0];
                                 let y = item.datapoint[1].toFixed(2);
 
-                                console.log("clicked a point!" + item.series.label + " " + y + " on " + x);
+                                var xDate = new Date(x);
+
+                                console.log("clicked a point!" + item.series.label + " " + y + " on " + xDate.toLocaleString());
 
                                 $("#tooltip").html("Wert " + y)
                                     .css({ top: item.pageY + 5, left: item.pageX + 5 })
@@ -1475,79 +1489,7 @@
                             opacity: 0.80
                         }).appendTo("body");
 
-                        /*
-                        $('#' + widgetID).bind('mouseleave', function (e) {
-                            console.log("mouseleave");
-                        });
-                        $('#' + widgetID).bind('mousedown', function (e) {
-                            console.log("mousedown");
-                        });
-                        $('#' + widgetID).bind('mouseup', function (e) {
-                            console.log("mouseup");
-                        });
-                        $('#' + widgetID).bind('mouseout', function (e) {
-                            console.log("mouseout");
-                        });
-                        $('#' + widgetID).bind('mouseenter', function (e) {
-                            console.log("mouseenter");
-                        });
-                        $('#' + widgetID).bind('touchend', function (e) {
-                            console.log("touchend");
-                        });
-                        */
-
-
-
-                        /*
                         
-                        $("<div id='tooltip'></div>").css({
-                            position: "absolute",
-                            display: "none",
-                            border: "1px solid #fdd",
-                            padding: "2px",
-                            "background-color": "#fee",
-                            opacity: 0.80
-                        }).appendTo("body");
-        
-                        $div.bind("plothover", function (event, pos, item) {
-        
-                            console.log("plothover");
-        
-                            if (!pos.x || !pos.y) {
-                                return;
-                            }
-        
-        
-                            var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
-                            $("#hoverdata").text(str);
-        
-        
-        
-                            if (item) {
-                                var x = item.datapoint[0].toFixed(2),
-                                    y = item.datapoint[1].toFixed(2);
-        
-                                $("#tooltip").html(item.series.label + " of " + x + " = " + y)
-                                    .css({ top: item.pageY + 5, left: item.pageX + 5 })
-                                    .fadeIn(200);
-                            } else {
-                                $("#tooltip").hide();
-                            }
-        
-                        });
-        
-                        $div.bind("plothovercleanup", function (event, pos, item) {
-                            $("#tooltip").hide();
-                        });
-        
-                        $div.bind("plotclick", function (event, pos, item) {
-                            if (item) {
-                                $("#clickdata").text(" - click point " + item.dataIndex + " in " + item.series.label);
-                                plot.highlight(item.series, item.datapoint);
-                            }
-                        });
-        
-                        */
                         //****************************************************************************************
 
                     }
@@ -1657,7 +1599,7 @@
         data-vis-attrs="time_interval[30 minutes]/select,1 second,10 seconds,30 seconds,1 minute,2 minutes,5 minutes,10 minutes,30 minutes,1 hour,2 hours,4 hours,8 hours,12 hours,24 hours;valueselect[sel_today]/select,sel_today,sel_last30days,sel_last12months,sel_years/onInstanceChanged;"
         data-vis-attrs0="withxaxix[true]/checkbox;axislabelcolor[#ffffff]/color;tickscolor[#ffffff]/color;LabelFontSize[8];LabelFontFamily[Arial]/fontname;withmarking[true]/checkbox;markingcolor[#eaebe5]/color;"
         data-vis-attrs1="borderWidth[1];bordercolor[#000000]/color;nobgcolor[true]/checkbox;bgcolor[#FFFFFF]/color;withlegend[false]/checkbox;legendposition[ne]/select,ne,nw,se,sw;"
-        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_kwatthour,sel_m3,sel_liter;ValueFactor[1];WithHOver[true]/checkbox"
+        data-vis-attrs2="group.graph;graphName;graphcolor[#f1f113]/color;coloraxis[#f1f113]/color;colorticklabel[#f1f113]/color;withyaxix[true]/checkbox;graphDateFormat[%H:%M];tickLength[5];showMinorTicks[true]/checkbox;showTicks[true]/checkbox;tickDecimals[1];tickSize[3];minTickSize[2];labelwidth[30];unit[sel_none]/select,sel_none,sel_watt,sel_kwatthour,sel_m3,sel_liter;ValueFactor[1];WithHOver[true]/checkbox;WithPoints[true]/checkbox;"
         data-vis-attrs3="group.oids;oid_value/id;">
 
     <div class="vis-widget <%== this.data.attr('class') %>" style="overflow: hidden;" id="<%= this.data.attr('wid') %>">
