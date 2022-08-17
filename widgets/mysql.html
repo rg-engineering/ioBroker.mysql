@@ -838,25 +838,35 @@
 
                 function formater(val, axis) {
 
-                    console.log('legendformater unit ' + formaterUnit);
 
-                    if (formaterUnit == "sel_kwatthour") {
-                        return xwhFormatter(val * 1000, axis);
-                    }
-                    else if (formaterUnit == "sel_watthour") {
-                        return xwhFormatter(val, axis);
-                    }
-                    else if (formaterUnit == "sel_watt") {
-                        return xwFormatter(val, axis);
-                    }
-                    else if (formaterUnit == "sel_liter") {
-                        return xliterFormatter(val, axis);
-                    }
-                    else if (formaterUnit == "sel_m3") {
-                        return xm3Formatter(val, axis);
+                    let myval;
+                    if (typeof val == "string") {
+                        console.log('formater convert to number ');
+                        myval = Number(val);
                     }
                     else {
-                        return val.toFixed(axis.tickDecimals);
+                        myval = val;
+                    }
+
+                    console.log('formater for ' + val + " " + typeof val);
+
+                    if (formaterUnit == "sel_kwatthour") {
+                        return xwhFormatter(myval * 1000, axis);
+                    }
+                    else if (formaterUnit == "sel_watthour") {
+                        return xwhFormatter(myval, axis);
+                    }
+                    else if (formaterUnit == "sel_watt") {
+                        return xwFormatter(myval, axis);
+                    }
+                    else if (formaterUnit == "sel_liter") {
+                        return xliterFormatter(myval, axis);
+                    }
+                    else if (formaterUnit == "sel_m3") {
+                        return xm3Formatter(myval, axis);
+                    }
+                    else {
+                        return (myval*1).toFixed(axis.tickDecimals);
                     }
                 }
 
@@ -1468,9 +1478,9 @@
 
                                 var xDate = new Date(x);
 
-                                console.log("clicked a point!" + item.series.label + " " + y + " on " + xDate.toLocaleString());
+                                console.log("clicked a point!" + item.series.label + " " + y + " on " + xDate.toLocaleString() + " = " + $.plot.formatDate(xDate, data.graphDateFormat));
 
-                                $("#tooltip").html("Wert " + y)
+                                $("#tooltip").html($.plot.formatDate(xDate, data.graphDateFormat) + "<br> " + item.series.yaxis.tickFormatter(y, item.series.yaxis))
                                     .css({ top: item.pageY + 5, left: item.pageX + 5 })
                                     .fadeIn(200);
 
@@ -1480,13 +1490,15 @@
                             }
                         });
 
+                        //damit Tooltip in Vordergrund erscheind, muss z-index vom widget 0 sein...
+
                         $("<div id='tooltip'></div>").css({
                             position: "absolute",
                             display: "none",
                             border: "1px solid #fdd",
                             padding: "2px",
                             "background-color": "#fee",
-                            opacity: 0.80
+                            opacity: 1
                         }).appendTo("body");
 
                         
