@@ -13,7 +13,8 @@
                 "it": "widget con descrizione comando",
                 "es": "widget con información sobre herramientas",
                 "pl": "widżet z podpowiedź",
-                "zh-cn": "带有工具提示的小部件"
+                "zh-cn": "带有工具提示的小部件",
+                "uk": "віджет із підказкою"
             },
             "0.0.9": {
                 "en": "overrun handling in import",
@@ -25,7 +26,8 @@
                 "it": "gestione del sovraccarico durante l'importazione",
                 "es": "manejo de excesos en la importación",
                 "pl": "obsługa przekroczeń w imporcie",
-                "zh-cn": "进口超限处理"
+                "zh-cn": "进口超限处理",
+                "uk": "обробка перевищення в імпорті"
             },
             "0.0.7": {
                 "en": "bug fix color of labels in widget",
@@ -37,7 +39,8 @@
                 "it": "bug fix colore delle etichette nel widget",
                 "es": "corrección de errores de color de las etiquetas en el widget",
                 "pl": "naprawa błędu koloru etykiet w widżecie",
-                "zh-cn": "错误修复小部件中标签的颜色"
+                "zh-cn": "错误修复小部件中标签的颜色",
+                "uk": "виправлено помилку кольору міток у віджеті"
             },
             "0.0.6": {
                 "en": "avoid endles loops",
@@ -49,7 +52,8 @@
                 "it": "evita i loop infiniti",
                 "es": "evitar bucles endles",
                 "pl": "unikaj niekończących się pętli",
-                "zh-cn": "避免无限循环"
+                "zh-cn": "避免无限循环",
+                "uk": "уникайте нескінченних циклів"
             },
             "0.0.5": {
                 "en": "bug fix data types",
@@ -61,7 +65,8 @@
                 "it": "tipi di dati di correzione di bug",
                 "es": "tipos de datos de corrección de errores",
                 "pl": "naprawa błędów typów danych",
-                "zh-cn": "错误修复数据类型"
+                "zh-cn": "错误修复数据类型",
+                "uk": "типи даних виправлення помилок"
             },
             "0.0.4": {
                 "en": "initial release",
@@ -73,7 +78,8 @@
                 "it": "Versione iniziale",
                 "es": "Versión inicial",
                 "pl": "Pierwsze wydanie",
-                "zh-cn": "首次出版"
+                "zh-cn": "首次出版",
+                "uk": "початковий випуск"
             }
         },
         "title": "mySQL",
@@ -87,7 +93,8 @@
             "it": "mySQL",
             "es": "mySQL",
             "pl": "mySQL",
-            "zh-cn": "MySQL的"
+            "zh-cn": "MySQL的",
+            "uk": "mySQL"
         },
         "desc": {
             "en": "interface to mySQL database",
@@ -99,7 +106,8 @@
             "it": "interfaccia al database mySQL",
             "es": "interfaz a la base de datos mySQL",
             "pl": "interfejs do bazy danych mySQL",
-            "zh-cn": "与mySQL数据库的接口"
+            "zh-cn": "与mySQL数据库的接口",
+            "uk": "інтерфейс до бази даних mySQL"
         },
         "authors": [
             "René G. <info@rg-engineering.eu>"
