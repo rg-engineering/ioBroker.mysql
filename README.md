@@ -25,6 +25,9 @@ interface to mySQL database
 
 ## Changelog
 
+### 0.0.13 (in progress)
+* (René) update dependencies
+
 ### 0.0.13 (2022-08-18)
 * (René) toltip in wizard added
 * (René) flot and dependencies updated
