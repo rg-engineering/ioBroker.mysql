@@ -1,54 +1,57 @@
 {
     "common": {
         "name": "mysql",
-        "version": "0.0.14",
-        "news": {
-            "0.0.14": {
-                "en": "dependencies updated",
-                "de": "Abhängigkeiten aktualisiert",
-                "ru": "зависимости обновлены",
-                "pt": "dependências atualizadas",
-                "nl": "afhankelijkheden bijgewerkt",
-                "fr": "dépendances mises à jour",
-                "it": "dipendenze aggiornate",
-                "es": "dependencias actualizadas",
-                "pl": "zaktualizowane zależności",
-                "uk": "залежності оновлено",
-                "zh-cn": "依赖更新"
-            }
+        "version": "0.0.15",
+      "news": {
+        "0.0.15": {
+          "en": "extended startup check"
+        },
+          "0.0.14": {
+            "en": "dependencies updated",
+            "de": "Abhängigkeiten aktualisiert",
+            "ru": "зависимости обновлены",
+            "pt": "dependências atualizadas",
+            "nl": "afhankelijkheden bijgewerkt",
+            "fr": "dépendances mises à jour",
+            "it": "dipendenze aggiornate",
+            "es": "dependencias actualizadas",
+            "pl": "zaktualizowane zależności",
+            "uk": "залежності оновлено",
+            "zh-cn": "依赖更新"
+          }
         },
         "titleLang": {
-            "en": "mySQL",
-            "de": "mySQL",
-            "ru": "MYSQL",
-            "pt": "mySQL",
-            "nl": "mySQL",
-            "fr": "mySQL",
-            "it": "mySQL",
-            "es": "mySQL",
-            "pl": "mySQL",
-            "zh-cn": "MySQL的",
-            "uk": "mySQL"
+          "en": "mySQL",
+          "de": "mySQL",
+          "ru": "MYSQL",
+          "pt": "mySQL",
+          "nl": "mySQL",
+          "fr": "mySQL",
+          "it": "mySQL",
+          "es": "mySQL",
+          "pl": "mySQL",
+          "zh-cn": "MySQL的",
+          "uk": "mySQL"
         },
         "desc": {
-            "en": "interface to mySQL database",
-            "de": "Schnittstelle zur mySQL-Datenbank",
-            "ru": "интерфейс к базе данных MySQL",
-            "pt": "interface com o banco de dados mySQL",
-            "nl": "interface naar mySQL-database",
-            "fr": "interface avec la base de données mySQL",
-            "it": "interfaccia al database mySQL",
-            "es": "interfaz a la base de datos mySQL",
-            "pl": "interfejs do bazy danych mySQL",
-            "zh-cn": "与mySQL数据库的接口",
-            "uk": "інтерфейс до бази даних mySQL"
+          "en": "interface to mySQL database",
+          "de": "Schnittstelle zur mySQL-Datenbank",
+          "ru": "интерфейс к базе данных MySQL",
+          "pt": "interface com o banco de dados mySQL",
+          "nl": "interface naar mySQL-database",
+          "fr": "interface avec la base de données mySQL",
+          "it": "interfaccia al database mySQL",
+          "es": "interfaz a la base de datos mySQL",
+          "pl": "interfejs do bazy danych mySQL",
+          "zh-cn": "与mySQL数据库的接口",
+          "uk": "інтерфейс до бази даних mySQL"
         },
         "authors": [
-            "René G. <info@rg-engineering.eu>"
+          "René G. <info@rg-engineering.eu>"
         ],
         "keywords": [
-            "mysql",
-            "database"
+          "mysql",
+          "database"
         ],
         "license": "MIT",
         "platform": "Javascript/Node.js",
@@ -64,21 +67,21 @@
         "compact": true,
         "materialize": true,
         "plugins": {
-            "sentry": {
-                "dsn": "https://f27d7fdc1a6e4f4ea5580a5f4fe9dfcf@o390433.ingest.sentry.io/5233514"
-            }
+          "sentry": {
+            "dsn": "https://f27d7fdc1a6e4f4ea5580a5f4fe9dfcf@o390433.ingest.sentry.io/5233514"
+          }
         },
         "dependencies": [
-            {
-                "js-controller": ">=2.0.0"
-            }
+          {
+            "js-controller": ">=2.0.0"
+          }
         ],
         "connectionType": "local",
         "dataSource": "push",
         "adminUI": {
-            "config": "materialize"
+          "config": "materialize"
         }
-    },
+      },
     "native": {
         "SQL_IP": "localhost",
         "SQL_Port": 3306,

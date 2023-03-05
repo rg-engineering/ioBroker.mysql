@@ -25,6 +25,9 @@ interface to mySQL database
 
 ## Changelog
 
+### 0.0.15 (in progress)
+* (René) extended startup check
+
 ### 0.0.14 (in progress)
 * (René) update dependencies
 

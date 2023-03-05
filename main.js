@@ -106,9 +106,11 @@ async function main() {
 
         await adapter.setStateAsync("vis.Status", { val: "ready", ack: true });
 
-
+        /*
         await TestUpdateDB();
-       
+
+        await CheckDB();
+        */
     }
     catch (e) {
         adapter.log.error("exception in  main [" + e + "]");
@@ -445,7 +447,7 @@ async function FillUpData(current, last, rowCells, preparedQuery, datatypes) {
 
     let querystring = "";
 
-    if (typeof last.value !== undefined) {
+    if (last.value_gesamt !== undefined) {
 
         adapter.log.debug(rowCells[0] + " last " +last.date.toDateString() + " current " + current.date.toDateString());
 
@@ -742,7 +744,7 @@ async function CreateDatepoints() {
         
 
 
-        if (adapter.config.queries != null && typeof adapter.config.queries != undefined && adapter.config.queries.length > 0) {
+        if (adapter.config.queries != null &&  adapter.config.queries !== undefined && adapter.config.queries.length > 0) {
 
             await adapter.setObjectNotExistsAsync("ExecuteQueries", {
                 type: "state",
@@ -913,7 +915,7 @@ function SubscribeStates(callback) {
 
         adapter.subscribeStates("Query");
 
-        if (adapter.config.queries != null && typeof adapter.config.queries != undefined && adapter.config.queries.length > 0) {
+        if (adapter.config.queries != null &&  adapter.config.queries != undefined && adapter.config.queries.length > 0) {
             adapter.subscribeStates("ExecuteQueries");
 
             for (let i = 0; i < adapter.config.queries.length; i++) {
@@ -944,7 +946,7 @@ function TimeConverter(UNIX_timestamp) {
 
     let a;
 
-    if (typeof UNIX_timestamp !== undefined && UNIX_timestamp > 0) {
+    if ( UNIX_timestamp !== undefined && UNIX_timestamp > 0) {
         a = new Date(UNIX_timestamp * 1000);
     }
     else {
@@ -1082,68 +1084,75 @@ async function VisUpdate() {
             //über alle Tabellen
             for (const i in rows) {
 
-                //get last data row in database
-                let LastImportValue_org;
-                let LastImportValue_gesamt;
-                let LastImportDate;
-                const tablename = rows[i][fields[0].name];
+                try {
+                    //get last data row in database
+                    let LastImportValue_org;
+                    let LastImportValue_gesamt;
+                    let LastImportDate;
+                    const tablename = rows[i][fields[0].name];
 
-                await adapter.setStateAsync("vis.Status", { val: "updating " + tablename, ack: true });
+                    await adapter.setStateAsync("vis.Status", { val: "updating " + tablename, ack: true });
 
-                //hole letzten Datensatz
-                const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
-                adapter.log.debug("query: " + querystring);
+                    //hole letzten Datensatz
+                    const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
+                    adapter.log.debug("query: " + querystring);
 
-                const [rows1, fields1] = await mysql_connection.query(querystring);
+                    const [rows1, fields1] = await mysql_connection.query(querystring);
 
-                adapter.log.debug("got result: " + JSON.stringify(rows1));
+                    adapter.log.debug("got result: " + JSON.stringify(rows1));
 
-                /*
-                2022 - 07 - 31 08: 25: 08.515	info	undefined is not a valid state value for id "mysql.0.vis.NewValue_Heizung"
-                2022 - 07 - 31 08: 25: 08.514	debug	got last value for Heizung : undefined from Sun Jul 17 2022 00: 00: 00 GMT + 0200(Central European Summer Time)
-                2022 - 07 - 31 08: 25: 08.513	debug	got result: [{ "ID": 4962, "Datum": "2022-07-16T22:00:00.000Z", "Zaehlerstand_Gesamt": 69544, "Verbrauch_taeglich": 18.1429, "Zaehlerstand_Org": 4009, "Zaehlertausch": 0, "Ueberlauf": 0 }]
-                2022 - 07 - 31 08: 25: 08.498	debug	query: select * from Heizung order by Datum DESC limit 1
-                */
+                    /*
+                    2022 - 07 - 31 08: 25: 08.515	info	undefined is not a valid state value for id "mysql.0.vis.NewValue_Heizung"
+                    2022 - 07 - 31 08: 25: 08.514	debug	got last value for Heizung : undefined from Sun Jul 17 2022 00: 00: 00 GMT + 0200(Central European Summer Time)
+                    2022 - 07 - 31 08: 25: 08.513	debug	got result: [{ "ID": 4962, "Datum": "2022-07-16T22:00:00.000Z", "Zaehlerstand_Gesamt": 69544, "Verbrauch_taeglich": 18.1429, "Zaehlerstand_Org": 4009, "Zaehlertausch": 0, "Ueberlauf": 0 }]
+                    2022 - 07 - 31 08: 25: 08.498	debug	query: select * from Heizung order by Datum DESC limit 1
+                    */
 
-                if (rows1.length > 0) {
+                    if (rows1.length > 0) {
 
-                    LastImportValue_org = rows1[0].Zaehlerstand_Org;
-                    LastImportValue_gesamt = rows1[0].Zaehlerstand_Gesamt;
-                    LastImportDate = new Date(rows1[0].Datum);
+                        LastImportValue_org = rows1[0].Zaehlerstand_Org;
+                        LastImportValue_gesamt = rows1[0].Zaehlerstand_Gesamt;
+                        LastImportDate = new Date(rows1[0].Datum);
 
-                    adapter.log.debug("got last value for " + tablename +  " org: " + LastImportValue_org + " gesamt: " + LastImportValue_gesamt + " from " + LastImportDate.toDateString());
+                        adapter.log.debug("got last value for " + tablename + " org: " + LastImportValue_org + " gesamt: " + LastImportValue_gesamt + " from " + LastImportDate.toDateString());
+                    }
+
+                    const importVal = await adapter.getStateAsync("vis.NewValue_" + tablename);
+
+                    let importValue = importVal.val;
+
+                    const importDiff = importValue - LastImportValue_org;
+
+                    adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue + " " + importDiff);
+
+                    const current = {
+                        value: importValue,
+                        diff: importDiff,
+                        date: importDate,
+                    };
+
+                    const last = {
+                        value_org: LastImportValue_org,
+                        value_gesamt: LastImportValue_gesamt,
+                        date: LastImportDate
+                    };
+
+                    if (importDate > LastImportDate) {
+                        const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand_Gesamt,Verbrauch_taeglich,Zaehlerstand_Org )  VALUES (";
+                        const rowCells = [0, 0, 0, 0];
+                        const datatypes = ["date", "float", "float", "float"];
+
+                        await FillUpData(current, last, rowCells, prequerystring, datatypes);
+                    }
+                    else {
+                        await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
+                        adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
+                    }
+
                 }
-
-                const importVal = await adapter.getStateAsync("vis.NewValue_" + tablename);
-
-                let importValue = importVal.val;
-
-                const importDiff = importValue - LastImportValue_org;
-
-                adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue + " " + importDiff);
-
-                const current = {
-                    value: importValue,
-                    diff: importDiff,
-                    date: importDate,
-                };
-
-                const last = {
-                    value_org: LastImportValue_org,
-                    value_gesamt: LastImportValue_gesamt,
-                    date: LastImportDate
-                };
-
-                if (importDate > LastImportDate) {
-                    const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand_Gesamt,Verbrauch_taeglich,Zaehlerstand_Org )  VALUES (";
-                    const rowCells = [0, 0, 0, 0];
-                    const datatypes = ["date", "float", "float", "float"];
-
-                    await FillUpData(current, last, rowCells, prequerystring, datatypes);
-                }
-                else {
-                    await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
-                    adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
+                catch (e) {
+                    await adapter.setStateAsync("vis.Status", { val: "exception, see log", ack: true });
+                    adapter.log.error("exception in VisUpdate " + tablename + "  [" + e + "]");
                 }
             }
         }
@@ -1223,31 +1232,116 @@ async function TestUpdateDB() {
 }
 
 
+async function CheckDB() {
+
+    let querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
+
+    const [rows, fields] = await mysql_connection.query(querystring);
+
+    adapter.log.debug("got tables: " + JSON.stringify(rows));
+
+    if (rows.length > 0) {
+
+        //über alle Tabellen
+        for (const i in rows) {
+            const tablename = rows[i][fields[0].name];
+
+            let querystring = "select * from " + tablename;
+
+            const [rows1, fields1] = await mysql_connection.query(querystring);
+            if (rows1.length > 0) {
+
+                let Zaehlerstand_Gesamt_LastDay = 0;
+                let Zaehlerstand_Org_LastDay = 0;
+                let nextValue_Gesamt_neu = 0;
+
+                for (let r = 0; r < rows1.length; r++) {
+
+                    const date = new Date(rows1[r].Datum);
+
+                    const Zaehlerstand_Gesamt = rows1[r].Zaehlerstand_Gesamt;
+                    const Zaehlerstand_Org = rows1[r].Zaehlerstand_Org;
+                    const Verbrauch_taeglich = rows1[r].Verbrauch_taeglich;
+                    const Zaehlertausch = rows1[r].Zaehlertausch;
+                    const Ueberlauf = rows1[r].Ueberlauf;
+
+
+                    let nextValue_Gesamt = Zaehlerstand_Gesamt_LastDay + Verbrauch_taeglich;
+                    nextValue_Gesamt_neu = nextValue_Gesamt_neu + Verbrauch_taeglich;
+
+                    /*
+                    if (nextValue_Gesamt - Zaehlerstand_Gesamt > 1) {
+                        adapter.log.debug(tablename + " should write : " + nextValue_Gesamt + " but is " + Zaehlerstand_Gesamt + " " + date.toDateString());
+                    }
+                    */
+
+                    
+                    if (nextValue_Gesamt_neu - Zaehlerstand_Gesamt > 1) {
+                        //adapter.log.debug(tablename + " should write neu : " + nextValue_Gesamt_neu + " but is " + Zaehlerstand_Gesamt + " " + date.toDateString());
+
+                        let year = date.getFullYear();
+                        let month = date.getMonth() + 1;
+                        let day = date.getDate();
+
+                        let sDate = year + "-" + month + "-" + day;
+
+                        let sql = "UPDATE `" + tablename + "` SET `Zaehlerstand_Gesamt`='" + nextValue_Gesamt_neu + "' WHERE `Datum`= '" + sDate + "'";
+                        adapter.log.debug(sql);
+                        await mysql_connection.query(sql);
+
+                    }
+                    
+
+                    /*
+                    if (Zaehlerstand_Org_LastDay - Zaehlerstand_Org > 5) {
+
+                        if (Zaehlerstand_Org_LastDay > 65000) {
+                            if (Ueberlauf != 1) {
+                                adapter.log.debug(tablename + " should write Ueberlauf at " + Zaehlerstand_Org_LastDay + " / " + Zaehlerstand_Org + " " + date.toDateString());
+                            }
+                        }
+                        else {
+                            if (Zaehlertausch != 1) {
+                                adapter.log.debug(tablename + " should write Zaehlertausch at " + Zaehlerstand_Org_LastDay + " / " + Zaehlerstand_Org + " " + date.toDateString());
+                            }
+                        }
+                    }
+                    */
+
+                    Zaehlerstand_Gesamt_LastDay = Zaehlerstand_Gesamt;
+                    Zaehlerstand_Org_LastDay = Zaehlerstand_Org;
+                }
+            }
+        }
+    }
+}
+
+
 
 /*
-select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Strom group by DATE_FORMAT(DATUM, "%Y")
-select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Wasser group by DATE_FORMAT(DATUM, "%Y")
-select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromWP group by DATE_FORMAT(DATUM, "%Y")
-select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromPV group by DATE_FORMAT(DATUM, "%Y")
-select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Heizung group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Strom group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Wasser group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromWP group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromPV group by DATE_FORMAT(DATUM, "%Y")
+select DATE_FORMAT(DATUM, "%Y") as year, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Heizung group by DATE_FORMAT(DATUM, "%Y")
 
-select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Strom group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
-select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Wasser group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
-select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromWP group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
-select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromPV group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
-select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand) - Min(Zaehlerstand) as value from Heizung group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Strom group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Wasser group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromWP group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromPV group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
+select DATE_FORMAT(DATUM, "%Y-%m") as month, Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Heizung group by DATE_FORMAT(DATUM, "%Y-%m") order by month DESC LIMIT 12
 
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from Strom order by date DESC LIMIT 30
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from Wasser order by date DESC LIMIT 30
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from StromWP order by date DESC LIMIT 30
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from StromPV order by date DESC LIMIT 30
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch as value from Heizung order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch_taeglich  as value from Strom order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch_taeglich  as value from Wasser order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch_taeglich  as value from StromWP order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch_taeglich  as value from StromPV order by date DESC LIMIT 30
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date, Verbrauch_taeglich  as value from Heizung order by date DESC LIMIT 30
 
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from Strom where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from Wasser where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromWP where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from StromPV where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
-select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand) - Min(Zaehlerstand) as value from Heizung where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Strom where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Wasser where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromWP where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromPV where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Heizung where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
 
 
 */
