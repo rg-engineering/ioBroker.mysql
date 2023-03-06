@@ -1342,6 +1342,12 @@ select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Z
 select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromWP where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
 select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromPV where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
 select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from Heizung where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+select DATE_FORMAT(DATUM, "%Y-%m-%d") as date , Max(Zaehlerstand_Gesamt) - Min(Zaehlerstand_Gesamt) as value from StromPV2 where Datum BETWEEN DATE_SUB(NOW(), INTERVAL 200 DAY) AND NOW() group by week(Datum) order by Datum ASC
+
+
+SELECT `Zaehlerstand_Gesamt` FROM `StromWP` WHERE 1 order by `Datum` DESC limit 1; 
+SELECT `Zaehlerstand_Gesamt` FROM `Heizung` WHERE 1 order by `Datum` DESC limit 1; 
+
 
 
 */
