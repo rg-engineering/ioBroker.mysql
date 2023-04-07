@@ -25,10 +25,13 @@ interface to mySQL database
 
 ## Changelog
 
-### 0.0.15 (in progress)
+### 0.0.16 (2023-04-07)
+* (René) update dependencies
+
+### 0.0.15 (2023-03-10)
 * (René) extended startup check
 
-### 0.0.14 (in progress)
+### 0.0.14 (2022-12-10)
 * (René) update dependencies
 
 ### 0.0.13 (2022-08-18)
