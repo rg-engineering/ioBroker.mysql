@@ -79,6 +79,13 @@ function startAdapter(options) {
                         await CreateTable(obj);
                         //to do
                         break;
+
+
+                    //Update data from other adapter adapter or script
+                    case "UpdateData":
+                        adapter.log.debug("got UpdateData");
+                        await UpdateData(obj);
+                        break;
                     default:
                         adapter.log.error("unknown message " + obj.command);
                         break;
@@ -203,6 +210,38 @@ async function CreateTable(obj) {
     }
     adapter.sendTo(obj.from, obj.command, null, obj.callback);
 }
+
+
+async function UpdateData(obj) {
+
+    try {
+
+        if (!bIsConnected) {
+            Connect();
+        }
+
+        adapter.log.debug("UpdateData table " + obj.message.table + " with " + obj.message.value + " on " + obj.message.date);
+
+        const tablename = obj.message.table;
+        const importValue = obj.message.value;
+        const importDate = new Date (obj.message.date);
+
+
+        //to do
+        //plausicheck
+
+        await VisUpdate1(tablename, importValue, importDate);
+
+
+    }
+    catch (e) {
+        adapter.log.error("exception in  UpdateData [" + e + "]");
+    }
+    adapter.sendTo(obj.from, obj.command, null, obj.callback);
+
+}
+
+
 
 async function ImportData(obj) {
 
@@ -1056,6 +1095,80 @@ async function VisOpened() {
 
 }
 
+async function VisUpdate1(tablename, importValue, importDate) {
+
+    try {
+        //get last data row in database
+        let LastImportValue_org;
+        let LastImportValue_gesamt;
+        let LastImportDate;
+       
+
+        await adapter.setStateAsync("vis.Status", { val: "updating " + tablename, ack: true });
+
+        //hole letzten Datensatz
+        const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
+        adapter.log.debug("query: " + querystring);
+
+        const [rows1, fields1] = await mysql_connection.query(querystring);
+
+        adapter.log.debug("got result: " + JSON.stringify(rows1));
+
+        /*
+        2022 - 07 - 31 08: 25: 08.515	info	undefined is not a valid state value for id "mysql.0.vis.NewValue_Heizung"
+        2022 - 07 - 31 08: 25: 08.514	debug	got last value for Heizung : undefined from Sun Jul 17 2022 00: 00: 00 GMT + 0200(Central European Summer Time)
+        2022 - 07 - 31 08: 25: 08.513	debug	got result: [{ "ID": 4962, "Datum": "2022-07-16T22:00:00.000Z", "Zaehlerstand_Gesamt": 69544, "Verbrauch_taeglich": 18.1429, "Zaehlerstand_Org": 4009, "Zaehlertausch": 0, "Ueberlauf": 0 }]
+        2022 - 07 - 31 08: 25: 08.498	debug	query: select * from Heizung order by Datum DESC limit 1
+        */
+
+        if (rows1.length > 0) {
+
+            LastImportValue_org = rows1[0].Zaehlerstand_Org;
+            LastImportValue_gesamt = rows1[0].Zaehlerstand_Gesamt;
+            LastImportDate = new Date(rows1[0].Datum);
+
+            adapter.log.debug("got last value for " + tablename + " org: " + LastImportValue_org + " gesamt: " + LastImportValue_gesamt + " from " + LastImportDate.toDateString());
+        }
+
+       
+       
+
+        const importDiff = importValue - LastImportValue_org;
+
+        adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue + " " + importDiff);
+
+        const current = {
+            value: importValue,
+            diff: importDiff,
+            date: importDate,
+        };
+
+        const last = {
+            value_org: LastImportValue_org,
+            value_gesamt: LastImportValue_gesamt,
+            date: LastImportDate
+        };
+
+        if (importDate > LastImportDate) {
+            const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand_Gesamt,Verbrauch_taeglich,Zaehlerstand_Org )  VALUES (";
+            const rowCells = [0, 0, 0, 0];
+            const datatypes = ["date", "float", "float", "float"];
+
+            await FillUpData(current, last, rowCells, prequerystring, datatypes);
+        }
+        else {
+            await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
+            adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
+        }
+
+    }
+    catch (e) {
+        await adapter.setStateAsync("vis.Status", { val: "exception, see log", ack: true });
+        adapter.log.error("exception in VisUpdate " + tablename + "  [" + e + "]");
+    }
+
+}
+
 
 async function VisUpdate() {
 
@@ -1084,76 +1197,13 @@ async function VisUpdate() {
             //über alle Tabellen
             for (const i in rows) {
 
-                try {
-                    //get last data row in database
-                    let LastImportValue_org;
-                    let LastImportValue_gesamt;
-                    let LastImportDate;
-                    const tablename = rows[i][fields[0].name];
+                const tablename = rows[i][fields[0].name];
 
-                    await adapter.setStateAsync("vis.Status", { val: "updating " + tablename, ack: true });
+                const importVal = await adapter.getStateAsync("vis.NewValue_" + tablename);
+                let importValue = importVal.val;
 
-                    //hole letzten Datensatz
-                    const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
-                    adapter.log.debug("query: " + querystring);
-
-                    const [rows1, fields1] = await mysql_connection.query(querystring);
-
-                    adapter.log.debug("got result: " + JSON.stringify(rows1));
-
-                    /*
-                    2022 - 07 - 31 08: 25: 08.515	info	undefined is not a valid state value for id "mysql.0.vis.NewValue_Heizung"
-                    2022 - 07 - 31 08: 25: 08.514	debug	got last value for Heizung : undefined from Sun Jul 17 2022 00: 00: 00 GMT + 0200(Central European Summer Time)
-                    2022 - 07 - 31 08: 25: 08.513	debug	got result: [{ "ID": 4962, "Datum": "2022-07-16T22:00:00.000Z", "Zaehlerstand_Gesamt": 69544, "Verbrauch_taeglich": 18.1429, "Zaehlerstand_Org": 4009, "Zaehlertausch": 0, "Ueberlauf": 0 }]
-                    2022 - 07 - 31 08: 25: 08.498	debug	query: select * from Heizung order by Datum DESC limit 1
-                    */
-
-                    if (rows1.length > 0) {
-
-                        LastImportValue_org = rows1[0].Zaehlerstand_Org;
-                        LastImportValue_gesamt = rows1[0].Zaehlerstand_Gesamt;
-                        LastImportDate = new Date(rows1[0].Datum);
-
-                        adapter.log.debug("got last value for " + tablename + " org: " + LastImportValue_org + " gesamt: " + LastImportValue_gesamt + " from " + LastImportDate.toDateString());
-                    }
-
-                    const importVal = await adapter.getStateAsync("vis.NewValue_" + tablename);
-
-                    let importValue = importVal.val;
-
-                    const importDiff = importValue - LastImportValue_org;
-
-                    adapter.log.debug("new values for " + tablename + " " + importDate.toDateString() + " " + importValue + " " + importDiff);
-
-                    const current = {
-                        value: importValue,
-                        diff: importDiff,
-                        date: importDate,
-                    };
-
-                    const last = {
-                        value_org: LastImportValue_org,
-                        value_gesamt: LastImportValue_gesamt,
-                        date: LastImportDate
-                    };
-
-                    if (importDate > LastImportDate) {
-                        const prequerystring = "INSERT INTO " + tablename + " (Datum,Zaehlerstand_Gesamt,Verbrauch_taeglich,Zaehlerstand_Org )  VALUES (";
-                        const rowCells = [0, 0, 0, 0];
-                        const datatypes = ["date", "float", "float", "float"];
-
-                        await FillUpData(current, last, rowCells, prequerystring, datatypes);
-                    }
-                    else {
-                        await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
-                        adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
-                    }
-
-                }
-                catch (e) {
-                    await adapter.setStateAsync("vis.Status", { val: "exception, see log", ack: true });
-                    adapter.log.error("exception in VisUpdate " + tablename + "  [" + e + "]");
-                }
+                await VisUpdate1(tablename, importValue, importDate);
+                
             }
         }
     }

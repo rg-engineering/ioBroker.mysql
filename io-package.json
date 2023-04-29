@@ -1,48 +1,51 @@
 {
     "common": {
         "name": "mysql",
-        "version": "0.0.16",
-        "news": {
-            "0.0.16": {
-                "en": "dependencies updated",
-                "de": "Abhängigkeiten aktualisiert",
-                "ru": "зависимости обновлены",
-                "pt": "dependências atualizadas",
-                "nl": "afhankelijkheden bijgewerkt",
-                "fr": "dépendances mises à jour",
-                "it": "dipendenze aggiornate",
-                "es": "dependencias actualizadas",
-                "pl": "zaktualizowane zależności",
-                "uk": "залежності оновлено",
-                "zh-cn": "依赖更新"
-            },
-            "0.0.15": {
-                "en": "extended startup check",
-                "de": "erweiterte Startprüfung",
-                "ru": "расширенная проверка запуска",
-                "pt": "verificação de inicialização estendida",
-                "nl": "uitgebreide opstartcontrole",
-                "fr": "contrôle de démarrage étendu",
-                "it": "controllo di avvio esteso",
-                "es": "verificación de inicio extendida",
-                "pl": "rozszerzona kontrola rozruchu",
-                "uk": "розширена перевірка запуску",
-                "zh-cn": "扩展启动检查"
-            },
-            "0.0.14": {
-                "en": "dependencies updated",
-                "de": "Abhängigkeiten aktualisiert",
-                "ru": "зависимости обновлены",
-                "pt": "dependências atualizadas",
-                "nl": "afhankelijkheden bijgewerkt",
-                "fr": "dépendances mises à jour",
-                "it": "dipendenze aggiornate",
-                "es": "dependencias actualizadas",
-                "pl": "zaktualizowane zależności",
-                "uk": "залежності оновлено",
-                "zh-cn": "依赖更新"
-            }
+        "version": "0.0.17",
+      "news": {
+        "0.0.17": {
+          "en": "support of sendTo from other adapters to update data"
         },
+        "0.0.16": {
+          "en": "dependencies updated",
+          "de": "Abhängigkeiten aktualisiert",
+          "ru": "зависимости обновлены",
+          "pt": "dependências atualizadas",
+          "nl": "afhankelijkheden bijgewerkt",
+          "fr": "dépendances mises à jour",
+          "it": "dipendenze aggiornate",
+          "es": "dependencias actualizadas",
+          "pl": "zaktualizowane zależności",
+          "uk": "залежності оновлено",
+          "zh-cn": "依赖更新"
+        },
+        "0.0.15": {
+          "en": "extended startup check",
+          "de": "erweiterte Startprüfung",
+          "ru": "расширенная проверка запуска",
+          "pt": "verificação de inicialização estendida",
+          "nl": "uitgebreide opstartcontrole",
+          "fr": "contrôle de démarrage étendu",
+          "it": "controllo di avvio esteso",
+          "es": "verificación de inicio extendida",
+          "pl": "rozszerzona kontrola rozruchu",
+          "uk": "розширена перевірка запуску",
+          "zh-cn": "扩展启动检查"
+        },
+        "0.0.14": {
+          "en": "dependencies updated",
+          "de": "Abhängigkeiten aktualisiert",
+          "ru": "зависимости обновлены",
+          "pt": "dependências atualizadas",
+          "nl": "afhankelijkheden bijgewerkt",
+          "fr": "dépendances mises à jour",
+          "it": "dipendenze aggiornate",
+          "es": "dependencias actualizadas",
+          "pl": "zaktualizowane zależności",
+          "uk": "залежності оновлено",
+          "zh-cn": "依赖更新"
+        }
+      },
         "titleLang": {
             "en": "mySQL",
             "de": "mySQL",
