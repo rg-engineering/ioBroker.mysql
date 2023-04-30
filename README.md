@@ -16,6 +16,12 @@
 **This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** 
 For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
 
+**If you like it, please consider a donation:**
+                                                                          
+[![paypal](https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=34ESBMJ932QZC) 
+
+
+
 ## mysql adapter for ioBroker
 
 interface to mySQL database
