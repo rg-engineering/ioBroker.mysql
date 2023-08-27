@@ -31,6 +31,11 @@ interface to mySQL database
 
 ## Changelog
 
+<!--
+  Placeholder for the next version (at the beginning of the line):
+  ### **WORK IN PROGRESS**
+-->
+
 ### 0.0.17 (2023-05-15)
 * (René) support of sendTo from other adapters to update data
 
