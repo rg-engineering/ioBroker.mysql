@@ -36,6 +36,9 @@ interface to mySQL database
   ### **WORK IN PROGRESS**
 -->
 
+ ### **WORK IN PROGRESS**
+* (René) update dependencies
+ 
 ### 0.0.17 (2023-05-15)
 * (René) support of sendTo from other adapters to update data
 
