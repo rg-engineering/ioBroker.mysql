@@ -36,7 +36,7 @@ interface to mySQL database
   ### **WORK IN PROGRESS**
 -->
 
- ### **WORK IN PROGRESS**
+### **WORK IN PROGRESS**
 * (René) update dependencies
  
 ### 0.0.17 (2023-05-15)
