@@ -11,6 +11,15 @@
 
 [![NPM](https://nodei.co/npm/iobroker.mysql.png?downloads=true)](https://nodei.co/npm/iobroker.mysql/)
 
+![node-lts](https://img.shields.io/node/v-lts/iobroker.mysql?style=flat-square)
+![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/npm/iobroker.mysql?label=npm%20dependencies&style=flat-square)
+
+
+![GitHub](https://img.shields.io/github/license/rg-engineering/ioBroker.mysql?style=flat-square)
+![GitHub repo size](https://img.shields.io/github/repo-size/rg-engineering/ioBroker.mysql?logo=github&style=flat-square)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/rg-engineering/ioBroker.mysql?logo=github&style=flat-square)
+![GitHub last commit](https://img.shields.io/github/last-commit/rg-engineering/ioBroker.mysql?logo=github&style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/rg-engineering/ioBroker.mysql?logo=github&style=flat-square)
 
 
 **This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** 
