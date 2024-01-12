@@ -1,151 +1,164 @@
 {
-    "common": {
-        "name": "mysql",
-        "version": "0.0.18",
-        "news": {
-            "0.0.18": {
-                "en": "dependencies updated",
-                "de": "Abhängigkeiten aktualisiert",
-                "ru": "зависимости обновлены",
-                "pt": "dependências atualizadas",
-                "nl": "afhankelijkheden bijgewerkt",
-                "fr": "dépendances mises à jour",
-                "it": "dipendenze aggiornate",
-                "es": "dependencias actualizadas",
-                "pl": "zależności zostały zaktualizowane",
-                "uk": "залежності оновлено",
-                "zh-cn": "依赖项已更新"
-            },
-            "0.0.17": {
-                "en": "support of sendTo from other adapters to update data",
-                "de": "Unterstützung von sendTo von anderen Adaptern zum Aktualisieren von Daten",
-                "ru": "поддержка sendTo от других адаптеров для обновления данных",
-                "pt": "suporte de sendTo de outros adaptadores para atualizar dados",
-                "nl": "ondersteuning van sendTo van andere adapters om gegevens bij te werken",
-                "fr": "prise en charge de sendTo à partir d'autres adaptateurs pour mettre à jour les données",
-                "it": "supporto di sendTo da altri adattatori per aggiornare i dati",
-                "es": "soporte de sendTo de otros adaptadores para actualizar datos",
-                "pl": "obsługa sendTo z innych adapterów w celu aktualizacji danych",
-                "uk": "підтримка sendTo з інших адаптерів для оновлення даних",
-                "zh-cn": "支持其他适配器的sendTo更新数据"
-            },
-            "0.0.16": {
-                "en": "dependencies updated",
-                "de": "Abhängigkeiten aktualisiert",
-                "ru": "зависимости обновлены",
-                "pt": "dependências atualizadas",
-                "nl": "afhankelijkheden bijgewerkt",
-                "fr": "dépendances mises à jour",
-                "it": "dipendenze aggiornate",
-                "es": "dependencias actualizadas",
-                "pl": "zaktualizowane zależności",
-                "uk": "залежності оновлено",
-                "zh-cn": "依赖更新"
-            },
-            "0.0.15": {
-                "en": "extended startup check",
-                "de": "erweiterte Startprüfung",
-                "ru": "расширенная проверка запуска",
-                "pt": "verificação de inicialização estendida",
-                "nl": "uitgebreide opstartcontrole",
-                "fr": "contrôle de démarrage étendu",
-                "it": "controllo di avvio esteso",
-                "es": "verificación de inicio extendida",
-                "pl": "rozszerzona kontrola rozruchu",
-                "uk": "розширена перевірка запуску",
-                "zh-cn": "扩展启动检查"
-            },
-            "0.0.14": {
-                "en": "dependencies updated",
-                "de": "Abhängigkeiten aktualisiert",
-                "ru": "зависимости обновлены",
-                "pt": "dependências atualizadas",
-                "nl": "afhankelijkheden bijgewerkt",
-                "fr": "dépendances mises à jour",
-                "it": "dipendenze aggiornate",
-                "es": "dependencias actualizadas",
-                "pl": "zaktualizowane zależności",
-                "uk": "залежності оновлено",
-                "zh-cn": "依赖更新"
-            }
-        },
-        "titleLang": {
-            "en": "mySQL",
-            "de": "mySQL",
-            "ru": "MYSQL",
-            "pt": "mySQL",
-            "nl": "mySQL",
-            "fr": "mySQL",
-            "it": "mySQL",
-            "es": "mySQL",
-            "pl": "mySQL",
-            "zh-cn": "MySQL的",
-            "uk": "mySQL"
-        },
-        "desc": {
-            "en": "interface to mySQL database",
-            "de": "Schnittstelle zur mySQL-Datenbank",
-            "ru": "интерфейс к базе данных MySQL",
-            "pt": "interface com o banco de dados mySQL",
-            "nl": "interface naar mySQL-database",
-            "fr": "interface avec la base de données mySQL",
-            "it": "interfaccia al database mySQL",
-            "es": "interfaz a la base de datos mySQL",
-            "pl": "interfejs do bazy danych mySQL",
-            "zh-cn": "与mySQL数据库的接口",
-            "uk": "інтерфейс до бази даних mySQL"
-        },
-        "authors": [
-            "René G. <info@rg-engineering.eu>"
-        ],
-        "keywords": [
-            "mysql",
-            "database"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "main.js",
-        "icon": "mysql.png",
-        "enabled": true,
-        "messagebox": true,
-        "extIcon": "https://raw.githubusercontent.com/rg-engineering/ioBroker.mysql/master/admin/mysql.png",
-        "readme": "https://github.com/rg-engineering/ioBroker.mysql/blob/master/README.md",
-        "loglevel": "info",
-        "mode": "daemon",
-        "type": "storage",
-        "compact": true,
-        "materialize": true,
-        "plugins": {
-            "sentry": {
-                "dsn": "https://f27d7fdc1a6e4f4ea5580a5f4fe9dfcf@o390433.ingest.sentry.io/5233514"
-            }
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=2.0.0"
-            }
-        ],
-        "connectionType": "local",
-        "dataSource": "push",
-        "adminUI": {
-            "config": "materialize"
-        }
+  "common": {
+    "name": "mysql",
+    "version": "0.0.19",
+    "news": {
+      "0.0.19": {
+        "en": "(René) update dependencies",
+        "de": "(René) aktualisieren Abhängigkeiten",
+        "ru": "(René) обновление зависимостей",
+        "pt": "(René) atualizar dependências",
+        "nl": "(René) update afhankelijkheden",
+        "fr": "(René) mettre à jour les dépendances",
+        "it": "(René) aggiornamento dipendenze",
+        "es": "(René) dependencias de actualización",
+        "pl": "(René) uaktualnianie zależności",
+        "uk": "(René) оновлення залежностей",
+        "zh-cn": "(René) 更新依赖关系"
+      },
+      "0.0.18": {
+        "en": "dependencies updated",
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "зависимости обновлены",
+        "pt": "dependências atualizadas",
+        "nl": "afhankelijkheden bijgewerkt",
+        "fr": "dépendances mises à jour",
+        "it": "dipendenze aggiornate",
+        "es": "dependencias actualizadas",
+        "pl": "zależności zostały zaktualizowane",
+        "uk": "залежності оновлено",
+        "zh-cn": "依赖项已更新"
+      },
+      "0.0.17": {
+        "en": "support of sendTo from other adapters to update data",
+        "de": "Unterstützung von sendTo von anderen Adaptern zum Aktualisieren von Daten",
+        "ru": "поддержка sendTo от других адаптеров для обновления данных",
+        "pt": "suporte de sendTo de outros adaptadores para atualizar dados",
+        "nl": "ondersteuning van sendTo van andere adapters om gegevens bij te werken",
+        "fr": "prise en charge de sendTo à partir d'autres adaptateurs pour mettre à jour les données",
+        "it": "supporto di sendTo da altri adattatori per aggiornare i dati",
+        "es": "soporte de sendTo de otros adaptadores para actualizar datos",
+        "pl": "obsługa sendTo z innych adapterów w celu aktualizacji danych",
+        "uk": "підтримка sendTo з інших адаптерів для оновлення даних",
+        "zh-cn": "支持其他适配器的sendTo更新数据"
+      },
+      "0.0.16": {
+        "en": "dependencies updated",
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "зависимости обновлены",
+        "pt": "dependências atualizadas",
+        "nl": "afhankelijkheden bijgewerkt",
+        "fr": "dépendances mises à jour",
+        "it": "dipendenze aggiornate",
+        "es": "dependencias actualizadas",
+        "pl": "zaktualizowane zależności",
+        "uk": "залежності оновлено",
+        "zh-cn": "依赖更新"
+      },
+      "0.0.15": {
+        "en": "extended startup check",
+        "de": "erweiterte Startprüfung",
+        "ru": "расширенная проверка запуска",
+        "pt": "verificação de inicialização estendida",
+        "nl": "uitgebreide opstartcontrole",
+        "fr": "contrôle de démarrage étendu",
+        "it": "controllo di avvio esteso",
+        "es": "verificación de inicio extendida",
+        "pl": "rozszerzona kontrola rozruchu",
+        "uk": "розширена перевірка запуску",
+        "zh-cn": "扩展启动检查"
+      },
+      "0.0.14": {
+        "en": "dependencies updated",
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "зависимости обновлены",
+        "pt": "dependências atualizadas",
+        "nl": "afhankelijkheden bijgewerkt",
+        "fr": "dépendances mises à jour",
+        "it": "dipendenze aggiornate",
+        "es": "dependencias actualizadas",
+        "pl": "zaktualizowane zależności",
+        "uk": "залежності оновлено",
+        "zh-cn": "依赖更新"
+      }
     },
-    "native": {
-        "SQL_IP": "localhost",
-        "SQL_Port": 3306,
-        "SQL_User": "",
-        "SQL_Password": "",
-        "SQL_Databasename": "",
-        "import_type": 1,
-        "import_separator": 2,
-        "import_table": "",
-        "import_FirstLineIsHeadline": true,
-        "import_CreateColumns": true,
-        "import_FillUp": false,
-        "Queries": [],
-        "InsertNewValuesFromVis": true
+    "titleLang": {
+      "en": "mySQL",
+      "de": "mySQL",
+      "ru": "MYSQL",
+      "pt": "mySQL",
+      "nl": "mySQL",
+      "fr": "mySQL",
+      "it": "mySQL",
+      "es": "mySQL",
+      "pl": "mySQL",
+      "zh-cn": "MySQL的",
+      "uk": "mySQL"
     },
-    "objects": [],
-    "instanceObjects": []
+    "desc": {
+      "en": "interface to mySQL database",
+      "de": "Schnittstelle zur mySQL-Datenbank",
+      "ru": "интерфейс к базе данных MySQL",
+      "pt": "interface com o banco de dados mySQL",
+      "nl": "interface naar mySQL-database",
+      "fr": "interface avec la base de données mySQL",
+      "it": "interfaccia al database mySQL",
+      "es": "interfaz a la base de datos mySQL",
+      "pl": "interfejs do bazy danych mySQL",
+      "zh-cn": "与mySQL数据库的接口",
+      "uk": "інтерфейс до бази даних mySQL"
+    },
+    "authors": [
+      "René G. <info@rg-engineering.eu>"
+    ],
+    "keywords": [
+      "mysql",
+      "database"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "mysql.png",
+    "enabled": true,
+    "messagebox": true,
+    "extIcon": "https://raw.githubusercontent.com/rg-engineering/ioBroker.mysql/master/admin/mysql.png",
+    "readme": "https://github.com/rg-engineering/ioBroker.mysql/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "storage",
+    "compact": true,
+    "materialize": true,
+    "plugins": {
+      "sentry": {
+        "dsn": "https://f27d7fdc1a6e4f4ea5580a5f4fe9dfcf@o390433.ingest.sentry.io/5233514"
+      }
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=2.0.0"
+      }
+    ],
+    "connectionType": "local",
+    "dataSource": "push",
+    "adminUI": {
+      "config": "materialize"
+    }
+  },
+  "native": {
+    "SQL_IP": "localhost",
+    "SQL_Port": 3306,
+    "SQL_User": "",
+    "SQL_Password": "",
+    "SQL_Databasename": "",
+    "import_type": 1,
+    "import_separator": 2,
+    "import_table": "",
+    "import_FirstLineIsHeadline": true,
+    "import_CreateColumns": true,
+    "import_FillUp": false,
+    "Queries": [],
+    "InsertNewValuesFromVis": true
+  },
+  "objects": [],
+  "instanceObjects": []
 }
