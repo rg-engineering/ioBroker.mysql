@@ -115,7 +115,11 @@
       "mysql",
       "database"
     ],
-    "license": "MIT",
+    "tier": 3,
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
     "platform": "Javascript/Node.js",
     "main": "main.js",
     "icon": "mysql.png",
@@ -135,7 +139,7 @@
     },
     "dependencies": [
       {
-        "js-controller": ">=2.0.0"
+        "js-controller": ">=5.0.0"
       }
     ],
     "connectionType": "local",
