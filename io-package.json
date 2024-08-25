@@ -144,7 +144,6 @@
     "mode": "daemon",
     "type": "storage",
     "compact": true,
-    "materialize": true,
     "plugins": {
       "sentry": {
         "dsn": "https://f27d7fdc1a6e4f4ea5580a5f4fe9dfcf@o390433.ingest.sentry.io/5233514"
@@ -152,7 +151,7 @@
     },
     "dependencies": [
       {
-        "js-controller": ">=5.0.0"
+        "js-controller": ">=5.0.19"
       }
     ],
     "connectionType": "local",
