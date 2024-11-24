@@ -44,6 +44,10 @@ interface to mySQL database
   Placeholder for the next version (at the beginning of the line):
   ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (René) see issue #257: install widgets again
+* (René) update dependencies
+
 ### 0.0.21 (2024-08-25)
 * (René) update dependencies
 
