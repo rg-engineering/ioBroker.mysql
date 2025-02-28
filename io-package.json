@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mysql",
-    "version": "0.0.21",
+    "version": "0.0.22",
     "news": {
+      "0.0.22": {
+        "en": "see issue #257: install widgets again\nupdate dependencies\nchanges requested by adapter checker",
+        "de": "siehe ausgabe #257: widgets erneut installieren\naktualisierung der abhängigkeiten\nänderungen, die von adapter checker angefordert werden",
+        "ru": "#257: установите виджеты снова\nобновление зависимостей\nизменения, запрошенные adapter checker",
+        "pt": "veja a edição #257: instale widgets novamente\ndependências\nalterações solicitadas pelo verificador do adaptador",
+        "nl": "zie probleem #257: widgets opnieuw installeren\nafhankelijkheden bijwerken\nwijzigingen gevraagd door adaptercontrole",
+        "fr": "voir numéro #257: installez à nouveau des widgets\nmettre à jour les dépendances\nmodifications demandées par l'adaptateur checker",
+        "it": "vedi problema #257: installare widgets di nuovo\naggiornamento dipendenze\nmodifiche richieste da adattatore checker",
+        "es": "ver número #257: instalar widgets de nuevo\ndependencias de actualización\ncambios solicitados por el adaptador",
+        "pl": "zobacz numer # 257: ponownie zainstalować widżety\naktualizacji zależności\nzmiany wymagane przez sprawdzacz adaptera",
+        "uk": "переглянути проблему #257: встановити віджети знову\nоновлення залежності\nзміни, які вимагаються перевіркою адаптера",
+        "zh-cn": "见问题257:再次安装部件\n更新依赖关系\n适配器检查器要求的更改"
+      },
       "0.0.21": {
         "en": "update dependencies",
         "de": "aktualisierung der abhängigkeiten",
@@ -42,7 +55,6 @@
         "uk": "(René) оновлення залежностей",
         "zh-cn": "(René) 更新依赖关系"
       }
-     
     },
     "titleLang": {
       "en": "mySQL",
