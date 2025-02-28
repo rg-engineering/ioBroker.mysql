@@ -10,7 +10,8 @@
   "license": "MIT",
   "keywords": [
     "mysql",
-    "database"
+    "database",
+    "ioBroker"
   ],
   "repository": {
     "type": "git",
