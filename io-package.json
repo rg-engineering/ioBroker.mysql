@@ -41,59 +41,8 @@
         "pl": "(René) uaktualnianie zależności",
         "uk": "(René) оновлення залежностей",
         "zh-cn": "(René) 更新依赖关系"
-      },
-      "0.0.18": {
-        "en": "dependencies updated",
-        "de": "Abhängigkeiten aktualisiert",
-        "ru": "зависимости обновлены",
-        "pt": "dependências atualizadas",
-        "nl": "afhankelijkheden bijgewerkt",
-        "fr": "dépendances mises à jour",
-        "it": "dipendenze aggiornate",
-        "es": "dependencias actualizadas",
-        "pl": "zależności zostały zaktualizowane",
-        "uk": "залежності оновлено",
-        "zh-cn": "依赖项已更新"
-      },
-      "0.0.17": {
-        "en": "support of sendTo from other adapters to update data",
-        "de": "Unterstützung von sendTo von anderen Adaptern zum Aktualisieren von Daten",
-        "ru": "поддержка sendTo от других адаптеров для обновления данных",
-        "pt": "suporte de sendTo de outros adaptadores para atualizar dados",
-        "nl": "ondersteuning van sendTo van andere adapters om gegevens bij te werken",
-        "fr": "prise en charge de sendTo à partir d'autres adaptateurs pour mettre à jour les données",
-        "it": "supporto di sendTo da altri adattatori per aggiornare i dati",
-        "es": "soporte de sendTo de otros adaptadores para actualizar datos",
-        "pl": "obsługa sendTo z innych adapterów w celu aktualizacji danych",
-        "uk": "підтримка sendTo з інших адаптерів для оновлення даних",
-        "zh-cn": "支持其他适配器的sendTo更新数据"
-      },
-      "0.0.16": {
-        "en": "dependencies updated",
-        "de": "Abhängigkeiten aktualisiert",
-        "ru": "зависимости обновлены",
-        "pt": "dependências atualizadas",
-        "nl": "afhankelijkheden bijgewerkt",
-        "fr": "dépendances mises à jour",
-        "it": "dipendenze aggiornate",
-        "es": "dependencias actualizadas",
-        "pl": "zaktualizowane zależności",
-        "uk": "залежності оновлено",
-        "zh-cn": "依赖更新"
-      },
-      "0.0.15": {
-        "en": "extended startup check",
-        "de": "erweiterte Startprüfung",
-        "ru": "расширенная проверка запуска",
-        "pt": "verificação de inicialização estendida",
-        "nl": "uitgebreide opstartcontrole",
-        "fr": "contrôle de démarrage étendu",
-        "it": "controllo di avvio esteso",
-        "es": "verificación de inicio extendida",
-        "pl": "rozszerzona kontrola rozruchu",
-        "uk": "розширена перевірка запуску",
-        "zh-cn": "扩展启动检查"
       }
+     
     },
     "titleLang": {
       "en": "mySQL",
@@ -134,7 +83,6 @@
       "type": "free"
     },
     "platform": "Javascript/Node.js",
-    "main": "main.js",
     "icon": "mysql.png",
     "enabled": true,
     "messagebox": true,
