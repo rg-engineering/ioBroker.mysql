@@ -1,3 +1,4 @@
+/* eslint-disable prefer-template */
 "use strict";
 
 /*
@@ -25,8 +26,7 @@ function startAdapter(options) {
             try {
                 //adapter.log.debug('start');
                 main();
-            }
-            catch (e) {
+            } catch (e) {
                 adapter.log.error("exception catch after ready [" + e + "]");
             }
         },
@@ -38,6 +38,7 @@ function startAdapter(options) {
                 Disconnect();
                 callback();
             } catch (e) {
+                adapter.log.error("exception catch after unload [" + e + "]");
                 callback();
             }
 
@@ -118,8 +119,7 @@ async function main() {
 
         await CheckDB();
         */
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  main [" + e + "]");
     }
 }
@@ -147,14 +147,12 @@ async function Connect() {
             if (err.message == "Can't add new command when connection is in closed state") {
                 adapter.log.error("already disconnected");
                 bIsConnected = false;
-            }
-            else {
+            } else {
                 // stop doing stuff with conn
                 Disconnect();
             }
         });
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  Connect [" + e + "]");
     }
 }
@@ -165,8 +163,7 @@ function Disconnect() {
         mysql_connection.end();
         adapter.log.info("mySQL Database disconnected");
         bIsConnected = false;
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  Disconnect [" + e + "]");
     }
 }
@@ -199,13 +196,11 @@ async function CreateTable(obj) {
 
             adapter.log.debug(querystring);
             await mysql_connection.query(querystring);
-        }
-        else {
+        } else {
             adapter.log.error("create table: name not valid " + JSON.stringify(obj.message.table));
         }
 
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  CreateTable [" + e + "]");
     }
     adapter.sendTo(obj.from, obj.command, null, obj.callback);
@@ -233,8 +228,7 @@ async function UpdateData(obj) {
         await VisUpdate1(tablename, importValue, importDate);
 
 
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  UpdateData [" + e + "]");
     }
     adapter.sendTo(obj.from, obj.command, null, obj.callback);
@@ -292,7 +286,7 @@ async function ImportData(obj) {
             if (data.createColumns) {
                 adapter.log.debug("creating columns");
                 querystring = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '" + data.table + "'";
-                const [rows, fields] = await mysql_connection.query(querystring);
+                const [rows] = await mysql_connection.query(querystring);
                 adapter.log.debug("got columns: " + JSON.stringify(rows));
 
                 if (rows.length > 0) {
@@ -316,8 +310,7 @@ async function ImportData(obj) {
 
                                 adapter.log.debug(querystring);
                                 await mysql_connection.query(querystring);
-                            }
-                            else {
+                            } else {
                                 adapter.log.debug("column " + headers[i] + " already available");
                             }
                         }
@@ -397,8 +390,7 @@ async function ImportData(obj) {
                 LastImportDate = CurrentImportDate;
                 LastImportValue = CurrentImportValue;
 
-            }
-            else {
+            } else {
 
                 //immer direkt eintragen
                 adapter.log.debug("no fill up");
@@ -408,8 +400,7 @@ async function ImportData(obj) {
 
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  ImportData [" + e + "]");
     }
     adapter.sendTo(obj.from, obj.command, null, obj.callback);
@@ -433,8 +424,7 @@ async function WriteRow(querystring, row, datatypes) {
             querystring += row[j];
             querystring += "'";
             cnt++;
-        }
-        else if (datatypes[j] == "float") {
+        } else if (datatypes[j] == "float") {
 
             const val = RemoveChars(row[j]);
 
@@ -443,8 +433,7 @@ async function WriteRow(querystring, row, datatypes) {
             }
             querystring += val;
             cnt++;
-        }
-        else if (datatypes[j] == "number") {
+        } else if (datatypes[j] == "number") {
 
             const val = RemoveChars(row[j]);
 
@@ -453,8 +442,7 @@ async function WriteRow(querystring, row, datatypes) {
             }
             querystring += val;
             cnt++;
-        }
-        else if (datatypes[j] != "none") {
+        } else if (datatypes[j] != "none") {
             if (cnt > 0) {
                 querystring += ", ";
             }
@@ -537,8 +525,7 @@ async function FillUpData(current, last, rowCells, preparedQuery, datatypes) {
         if (Math.abs(NewValue_Gesamt - current.value) > 1) {
             adapter.log.warn("calculation diff " + NewValue_Gesamt + " / " + current.value);
         }
-    }
-    else {
+    } else {
         // direkt eintragen ohne interpol, da erster wert
         adapter.log.debug("direct, data " + rowCells[0] + " " + rowCells[1] + " " + rowCells[3] + " " + current.date.toDateString());
         querystring = preparedQuery;
@@ -603,8 +590,7 @@ async function ListTables(obj) {
                 tables.push(rows[i][fields[0].name]);
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  ListTables [" + e + "]");
     }
     adapter.sendTo(obj.from, obj.command, tables, obj.callback);
@@ -621,7 +607,7 @@ async function HandleQuery(state) {
 
         adapter.log.debug("query: " + querystring);
 
-        const [rows, fields] = await mysql_connection.query(querystring);
+        const [rows] = await mysql_connection.query(querystring);
 
         //adapter.log.debug("got result: " + JSON.stringify(rows));
 
@@ -631,8 +617,7 @@ async function HandleQuery(state) {
             await adapter.setStateAsync("Result", { ack: true, val: JSON.stringify(rows)});
 
         }
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  HandleQuery [" + e + "]");
     }
 }
@@ -652,8 +637,7 @@ async function HandleQueries() {
 
                 await FillUp(i);
 
-            }
-            else {
+            } else {
 
 
                 let querystring = adapter.config.queries[i].query;
@@ -674,7 +658,7 @@ async function HandleQueries() {
 
                 adapter.log.debug("query: " + querystring);
 
-                const [rows, fields] = await mysql_connection.query(querystring);
+                const [rows] = await mysql_connection.query(querystring);
 
                 adapter.log.debug("got result: " + JSON.stringify(rows));
 
@@ -686,8 +670,7 @@ async function HandleQueries() {
                 }
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  HandleQuery [" + e + "]");
     }
 }
@@ -711,7 +694,7 @@ async function FillUp(query) {
             const querystring = "select * from " + tablename + "order BY ID desc limit 1";
             adapter.log.debug("query: " + querystring);
 
-            const [rows, fields] = await mysql_connection.query(querystring);
+            const [rows] = await mysql_connection.query(querystring);
 
             adapter.log.debug("got result: " + JSON.stringify(rows));
 
@@ -726,18 +709,15 @@ async function FillUp(query) {
                 //claculate value per day
 
                 //loop over all necessary data sets
-            }
-            else {
+            } else {
                 adapter.log.error("no entry found for " + querystring);
             }
 
-        }
-        else {
+        } else {
             adapter.log.error("table name not found " + query + " to fillup");
         }
 
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in  FillUp [" + e + "]");
     }
 
@@ -934,8 +914,7 @@ async function CreateDatepoints() {
 
         }
 
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in CreateDatapoints [" + e + "]");
     }
 
@@ -973,11 +952,12 @@ function SubscribeStates(callback) {
 
 
         adapter.log.debug("#subscribtion finished");
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in SubscribeStates [" + e + "]");
     }
-    if (callback) callback();
+    if (callback) {
+callback();
+}
 }
 
 
@@ -987,8 +967,7 @@ function TimeConverter(UNIX_timestamp) {
 
     if ( UNIX_timestamp !== undefined && UNIX_timestamp > 0) {
         a = new Date(UNIX_timestamp * 1000);
-    }
-    else {
+    } else {
         a = new Date();
     }
 
@@ -1024,19 +1003,15 @@ async function HandleStateChange(id, state) {
 
             if (id.includes("ExecuteQueries")) {
                 await HandleQueries();
-            }
-            else if (id.includes("Query")) {
+            } else if (id.includes("Query")) {
                 await HandleQuery(state);
-            }
-            else if (id.includes("vis.Update")) {
+            } else if (id.includes("vis.Update")) {
                 await VisUpdate();
-            }
-            else if (id.includes("vis.Opened")) {
+            } else if (id.includes("vis.Opened")) {
                 await VisOpened();
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in HandleStateChange [" + e + "]");
     }
 }
@@ -1068,7 +1043,7 @@ async function VisOpened() {
                 querystring = "select * from " + tablename + " order by Datum DESC limit 1";
                 adapter.log.debug("query: " + querystring);
 
-                const [rows1, fields1] = await mysql_connection.query(querystring);
+                const [rows1] = await mysql_connection.query(querystring);
 
                 adapter.log.debug("got result: " + JSON.stringify(rows1));
                 if (rows1.length > 0) {
@@ -1088,8 +1063,7 @@ async function VisOpened() {
             }
         }
 
-    }
-    catch (e) {
+    } catch (e) {
         adapter.log.error("exception in VisOpened [" + e + "]");
     }
 
@@ -1110,7 +1084,7 @@ async function VisUpdate1(tablename, importValue, importDate) {
         const querystring = "select * from " + tablename + " order by Datum DESC limit 1";
         adapter.log.debug("query: " + querystring);
 
-        const [rows1, fields1] = await mysql_connection.query(querystring);
+        const [rows1] = await mysql_connection.query(querystring);
 
         adapter.log.debug("got result: " + JSON.stringify(rows1));
 
@@ -1155,14 +1129,12 @@ async function VisUpdate1(tablename, importValue, importDate) {
             const datatypes = ["date", "float", "float", "float"];
 
             await FillUpData(current, last, rowCells, prequerystring, datatypes);
-        }
-        else {
+        } else {
             await adapter.setStateAsync("vis.Status", { val: "error, see log", ack: true });
             adapter.log.error("import date before last import date" + importDate.toDateString() + " < " + LastImportDate.toDateString());
         }
 
-    }
-    catch (e) {
+    } catch (e) {
         await adapter.setStateAsync("vis.Status", { val: "exception, see log", ack: true });
         adapter.log.error("exception in VisUpdate " + tablename + "  [" + e + "]");
     }
@@ -1206,8 +1178,7 @@ async function VisUpdate() {
                 
             }
         }
-    }
-    catch (e) {
+    } catch (e) {
         await adapter.setStateAsync("vis.Status", { val: "exception, see log", ack: true });
         adapter.log.error("exception in VisUpdate [" + e + "]");
     }
@@ -1226,6 +1197,7 @@ async function VisUpdate() {
     adapter.log.info("### finished");
 }
 
+/*
 //nur um DB anzupassen, wird dann wieder entfernt
 async function TestUpdateDB() {
 
@@ -1280,8 +1252,8 @@ async function TestUpdateDB() {
     }
 
 }
-
-
+*/
+/*
 async function CheckDB() {
 
     let querystring = "SHOW TABLES in " + adapter.config.SQL_Databasename;
@@ -1319,11 +1291,7 @@ async function CheckDB() {
                     let nextValue_Gesamt = Zaehlerstand_Gesamt_LastDay + Verbrauch_taeglich;
                     nextValue_Gesamt_neu = nextValue_Gesamt_neu + Verbrauch_taeglich;
 
-                    /*
-                    if (nextValue_Gesamt - Zaehlerstand_Gesamt > 1) {
-                        adapter.log.debug(tablename + " should write : " + nextValue_Gesamt + " but is " + Zaehlerstand_Gesamt + " " + date.toDateString());
-                    }
-                    */
+                    
 
                     
                     if (nextValue_Gesamt_neu - Zaehlerstand_Gesamt > 1) {
@@ -1342,21 +1310,7 @@ async function CheckDB() {
                     }
                     
 
-                    /*
-                    if (Zaehlerstand_Org_LastDay - Zaehlerstand_Org > 5) {
-
-                        if (Zaehlerstand_Org_LastDay > 65000) {
-                            if (Ueberlauf != 1) {
-                                adapter.log.debug(tablename + " should write Ueberlauf at " + Zaehlerstand_Org_LastDay + " / " + Zaehlerstand_Org + " " + date.toDateString());
-                            }
-                        }
-                        else {
-                            if (Zaehlertausch != 1) {
-                                adapter.log.debug(tablename + " should write Zaehlertausch at " + Zaehlerstand_Org_LastDay + " / " + Zaehlerstand_Org + " " + date.toDateString());
-                            }
-                        }
-                    }
-                    */
+                    
 
                     Zaehlerstand_Gesamt_LastDay = Zaehlerstand_Gesamt;
                     Zaehlerstand_Org_LastDay = Zaehlerstand_Org;
