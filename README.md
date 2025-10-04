@@ -47,6 +47,7 @@ interface to mySQL database
 
 ### **WORK IN PROGRESS**
 * (René) new testing
+* (René) changes requested by adapter checker
 
 ### 0.0.22 (2025-02-28)
 * (René) see issue #257: install widgets again
