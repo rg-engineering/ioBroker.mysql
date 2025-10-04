@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mysql",
-    "version": "0.0.22",
+    "version": "0.0.23",
     "news": {
+      "0.0.23": {
+        "en": "new testing\nchanges requested by adapter checker",
+        "de": "neue tests\nänderungen, die von adapter checker angefordert werden",
+        "ru": "новые испытания\nизменения, запрошенные adapter checker",
+        "pt": "novos testes\nalterações solicitadas pelo verificador de adaptadores",
+        "nl": "nieuwe tests\nwijzigingen gevraagd door adaptercontrole",
+        "fr": "nouveaux essais\nmodifications demandées par l'adaptateur checker",
+        "it": "nuovi test\nmodifiche richieste da adattatore checker",
+        "es": "nuevas pruebas\ncambios solicitados por el adaptador",
+        "pl": "nowe badania\nzmiany wymagane przez sprawdzacz adaptera",
+        "uk": "новий тест\nзміни, які вимагаються перевіркою адаптера",
+        "zh-cn": "新测试\n适配器检查器要求的更改"
+      },
       "0.0.22": {
         "en": "see issue #257: install widgets again\nupdate dependencies\nchanges requested by adapter checker",
         "de": "siehe ausgabe #257: widgets erneut installieren\naktualisierung der abhängigkeiten\nänderungen, die von adapter checker angefordert werden",
