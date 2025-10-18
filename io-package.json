@@ -153,6 +153,9 @@
     "Queries": [],
     "InsertNewValuesFromVis": true
   },
+  "protectedNative": [
+    "SQL_Password"
+  ],
   "objects": [],
   "instanceObjects": []
 }

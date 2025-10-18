@@ -13,3 +13,4 @@ lib/i18n/*/flat.txt
 *.orig
 /bin/Microsoft.NodejsTools.WebRole.dll
 /obj/Debug/
+.commitinfo
