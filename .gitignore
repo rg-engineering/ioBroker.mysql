@@ -11,3 +11,5 @@ lib/i18n/*/flat.txt
 /.project
 /.settings/
 *.orig
+/bin/Microsoft.NodejsTools.WebRole.dll
+/obj/Debug/
