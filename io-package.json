@@ -156,6 +156,9 @@
   "protectedNative": [
     "SQL_Password"
   ],
+  "encryptedNative": [
+    "SQL_Password"
+  ],
   "objects": [],
   "instanceObjects": []
 }

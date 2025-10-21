@@ -91,12 +91,9 @@ jobs:
            export SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}
            export SENTRY_URL=https://sentry.io
            export SENTRY_ORG=rg-engineering
-           export SENTRY_PROJECT=iobroker__mysql
+           export SENTRY_PROJECT=iobroker_mysql
            export SENTRY_VERSION=iobroker.mysql@${{ steps.extract_release.outputs.VERSION }}
            sentry-cli releases new $SENTRY_VERSION
            sentry-cli releases set-commits $SENTRY_VERSION --auto
            sentry-cli releases finalize $SENTRY_VERSION
 
-
-
-           
