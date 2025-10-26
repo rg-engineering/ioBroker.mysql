@@ -44,6 +44,11 @@ interface to mySQL database
   Placeholder for the next version (at the beginning of the line):
   ### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (René) changes requested by adapter checker
+* (René) sentry bug fixes
+
 ### 0.0.23 (2025-10-04)
 * (René) new testing
 * (René) changes requested by adapter checker
