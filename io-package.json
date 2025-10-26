@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mysql",
-    "version": "0.0.23",
+    "version": "0.0.24",
     "news": {
+      "0.0.24": {
+        "en": "changes requested by adapter checker\nsentry bug fixes",
+        "de": "änderungen, die von adapter checker angefordert werden\nfehlerbehebungen von gesendeten fehlern",
+        "ru": "изменения, запрошенные adapter checker\nисправлять ошибки часового",
+        "pt": "alterações solicitadas pelo verificador de adaptadores\ncorrecções de erros de sentinela",
+        "nl": "wijzigingen gevraagd door adaptercontrole\nsentry bug fixes",
+        "fr": "modifications demandées par l'adaptateur checker\ncorrections de bogues sentinaires",
+        "it": "modifiche richieste da adattatore checker\ncorrezioni di bug inviati",
+        "es": "cambios solicitados por el adaptador\ncentry bug fixes",
+        "pl": "zmiany wymagane przez sprawdzacz adaptera\n@ info: whatsthis",
+        "uk": "зміни, які вимагаються перевіркою адаптера\nусунення несправностей",
+        "zh-cn": "适配器检查器要求的更改\n哨兵错误修正"
+      },
       "0.0.23": {
         "en": "new testing\nchanges requested by adapter checker",
         "de": "neue tests\nänderungen, die von adapter checker angefordert werden",
