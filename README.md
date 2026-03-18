@@ -44,6 +44,10 @@ interface to mySQL database
   Placeholder for the next version (at the beginning of the line):
   ### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (René) update dependencies and changes requested by adapter checker
+
 ### 0.0.24 (2025-10-26)
 * (René) changes requested by adapter checker
 * (René) sentry bug fixes
@@ -112,7 +116,7 @@ interface to mySQL database
 ## License
 MIT License
 
-Copyright (c) 2019-2025 René G. <info@rg-engineering.eu>
+Copyright (c) 2019-2026 René G. <info@rg-engineering.eu>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
