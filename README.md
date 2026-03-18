@@ -44,8 +44,7 @@ interface to mySQL database
   Placeholder for the next version (at the beginning of the line):
   ### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 0.0.25 (2026-03-18)
 * (René) update dependencies and changes requested by adapter checker
 
 ### 0.0.24 (2025-10-26)

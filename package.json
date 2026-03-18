@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mysql",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "description": "interface to mySQL database",
   "author": {
     "name": "René G.",

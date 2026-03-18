@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mysql",
-    "version": "0.0.24",
+    "version": "0.0.25",
     "news": {
+      "0.0.25": {
+        "en": "update dependencies and changes requested by adapter checker",
+        "de": "aktualisierung von abhängigkeiten und änderungen, die vom adapter-checker angefordert werden",
+        "ru": "зависимости от обновлений и изменения, запрошенные adapter checker",
+        "pt": "atualizar dependências e alterações solicitadas pelo verificador de adaptadores",
+        "nl": "update afhankelijkheden en wijzigingen gevraagd door adaptercontrole",
+        "fr": "mettre à jour les dépendances et les modifications demandées par l'adaptateur checker",
+        "it": "aggiornamento dipendenze e modifiche richieste da adattatore checker",
+        "es": "actualizar las dependencias y los cambios solicitados por el control de adaptador",
+        "pl": "aktualizacji zależności i zmian wymaganych przez sprawdzacz adaptera",
+        "uk": "оновлення залежностей та змін, які вимагаються перевіркою адаптера",
+        "zh-cn": "适配器检查器请求的更新依赖性和更改"
+      },
       "0.0.24": {
         "en": "changes requested by adapter checker\nsentry bug fixes",
         "de": "änderungen, die von adapter checker angefordert werden\nfehlerbehebungen von gesendeten fehlern",
